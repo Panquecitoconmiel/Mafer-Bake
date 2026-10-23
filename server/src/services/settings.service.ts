@@ -4,12 +4,19 @@ import { prisma, type Tx } from "../config/prisma.js";
 import { badRequest } from "../utils/errors.js";
 import { parseDateOnly, toDateOnly } from "../utils/format.js";
 
-export async function getSettings(tx: Tx = prisma): Promise<StoreSettings> {
-  return tx.storeSettings.upsert({ where: { id: 1 }, update: {}, create: { id: 1 } });
+/** Configuración con los días sin servicio ya convertidos a lista de números. */
+export type Settings = Omit<StoreSettings, "closedWeekdays"> & { closedWeekdays: number[] };
+
+const toWeekdays = (v: unknown): number[] =>
+  Array.isArray(v) ? v.map(Number).filter((n) => Number.isInteger(n) && n >= 0 && n <= 6) : [];
+
+export async function getSettings(tx: Tx = prisma): Promise<Settings> {
+  const s = await tx.storeSettings.upsert({ where: { id: 1 }, update: {}, create: { id: 1, closedWeekdays: [] } });
+  return { ...s, closedWeekdays: toWeekdays(s.closedWeekdays) };
 }
 
 /** Información pública de la tienda (sin datos internos). */
-export function publicSettings(s: StoreSettings) {
+export function publicSettings(s: Settings) {
   return {
     storeName: s.storeName,
     slogan: s.slogan,

@@ -8,10 +8,14 @@ export const app = createApp();
 
 /** Vacía todas las tablas de la base de pruebas. */
 export async function resetDb() {
-  const tables = await prisma.$queryRaw<{ tablename: string }[]>`
-    SELECT tablename::text AS tablename FROM pg_tables WHERE schemaname = 'public' AND tablename <> '_prisma_migrations'`;
-  const list = tables.map((t) => `"public"."${t.tablename}"`).join(", ");
-  await prisma.$executeRawUnsafe(`TRUNCATE TABLE ${list} RESTART IDENTITY CASCADE`);
+  const tables = await prisma.$queryRaw<{ name: string }[]>`
+    SELECT CAST(TABLE_NAME AS CHAR) AS name FROM information_schema.TABLES
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME <> '_prisma_migrations'`;
+  await prisma.$transaction(async (tx) => {
+    await tx.$executeRawUnsafe("SET FOREIGN_KEY_CHECKS = 0");
+    for (const t of tables) await tx.$executeRawUnsafe(`TRUNCATE TABLE \`${t.name}\``);
+    await tx.$executeRawUnsafe("SET FOREIGN_KEY_CHECKS = 1");
+  });
 }
 
 export async function seedCatalog() {
@@ -55,7 +59,7 @@ export async function seedCatalog() {
     data: { name: "Borrador", slug: "borrador", shortDescription: "x", description: "x", priceCents: 1000, categoryId: cat.id, status: "DRAFT" },
   });
   const slot = await prisma.deliverySlot.create({ data: { label: "10:00 – 13:00", startTime: "10:00", endTime: "13:00", capacity: 2 } });
-  await prisma.storeSettings.create({ data: { id: 1 } });
+  await prisma.storeSettings.create({ data: { id: 1, closedWeekdays: [] } });
   return { cat, cake, cookie, draft, slot };
 }
 

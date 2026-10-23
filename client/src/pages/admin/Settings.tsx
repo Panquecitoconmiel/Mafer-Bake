@@ -29,10 +29,18 @@ export default function AdminSettings() {
   useEffect(() => { if (data) { setS(data); setFee(pesos(data.deliveryFeeCents)); setFreeMin(pesos(data.freeDeliveryMinCents)); } }, [data]);
 
   const save = useMutation({
-    mutationFn: () => adminApi.send("PUT", "/settings", {
-      ...s!, deliveryFeeCents: fee ? parseMoney(fee) : null, freeDeliveryMinCents: freeMin ? parseMoney(freeMin) : null,
-      taxRatePercent: s!.taxRatePercent ? Number(s!.taxRatePercent) : null,
-    }),
+    mutationFn: () => {
+      // Solo se envían los campos editables (el servidor rechaza campos internos como id o updatedAt).
+      const { storeName, slogan, contactEmail, contactPhone, whatsapp, instagramUrl, facebookUrl, pickupAddress, businessHours,
+        pickupEnabled, deliveryEnabled, deliveryCoverage, minLeadHours, maxAdvanceDays, closedWeekdays, pricesIncludeTax, cancellationPolicy } = s!;
+      return adminApi.send("PUT", "/settings", {
+        storeName, slogan, contactEmail, contactPhone, whatsapp, instagramUrl, facebookUrl, pickupAddress, businessHours,
+        pickupEnabled, deliveryEnabled, deliveryCoverage, minLeadHours, maxAdvanceDays, closedWeekdays, pricesIncludeTax, cancellationPolicy,
+        deliveryFeeCents: fee ? parseMoney(fee) : null,
+        freeDeliveryMinCents: freeMin ? parseMoney(freeMin) : null,
+        taxRatePercent: s!.taxRatePercent ? Number(s!.taxRatePercent) : null,
+      });
+    },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin", "settings"] }); qc.invalidateQueries({ queryKey: ["store"] }); setErrors({}); notify("Configuración guardada."); },
     onError: (e) => { setErrors(e instanceof ApiError ? e.fieldErrors : {}); notify(errorMessage(e), "error"); },
   });

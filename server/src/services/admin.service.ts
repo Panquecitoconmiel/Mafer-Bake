@@ -27,10 +27,12 @@ export async function dashboard() {
     prisma.order.count({ where: { status: "PENDING_PAYMENT" } }),
     prisma.order.count({ where: { status: { in: ["CONFIRMED", "IN_PREPARATION"] } } }),
     prisma.order.count({ where: { status: "READY" } }),
-    prisma.$queryRaw<{ id: string; name: string; stock: number; lowStockThreshold: number }[]>`
-      SELECT id, name, stock, "lowStockThreshold" FROM "Product"
-      WHERE "inventoryMode" = 'TRACKED' AND status <> 'ARCHIVED' AND stock <= "lowStockThreshold"
-      ORDER BY stock ASC LIMIT 10`,
+    prisma.product.findMany({
+      where: { inventoryMode: "TRACKED", status: { not: "ARCHIVED" }, stock: { lte: prisma.product.fields.lowStockThreshold } },
+      select: { id: true, name: true, stock: true, lowStockThreshold: true },
+      orderBy: { stock: "asc" },
+      take: 10,
+    }),
     prisma.orderItem.groupBy({
       by: ["productId", "productName"],
       where: { order: { paymentStatus: { in: ["PAID", "PARTIALLY_REFUNDED"] }, paidAt: { gte: startMonth } } },
@@ -109,7 +111,7 @@ const adminProductInclude = {
 
 export async function listProductsAdmin(q: z.infer<typeof V.listQuerySchema> & { category?: string }) {
   const where: Prisma.ProductWhereInput = {
-    ...(q.q && { name: { contains: q.q, mode: "insensitive" } }),
+    ...(q.q && { name: { contains: q.q } }),
     ...(q.status && ["DRAFT", "PUBLISHED", "ARCHIVED"].includes(q.status) && { status: q.status as "DRAFT" }),
     ...(q.category && { categoryId: q.category }),
   };
@@ -247,8 +249,8 @@ export async function listOrdersAdmin(q: z.infer<typeof V.listQuerySchema> & { p
     ...(q.q && {
       OR: [
         ...(num && /^\d+$/.test(num) ? [{ number: Number(num) }] : []),
-        { user: { email: { contains: q.q, mode: "insensitive" as const } } },
-        { user: { lastName: { contains: q.q, mode: "insensitive" as const } } },
+        { user: { email: { contains: q.q } } },
+        { user: { lastName: { contains: q.q } } },
       ],
     }),
   };
@@ -363,9 +365,9 @@ export async function listCustomers(q: z.infer<typeof V.listQuerySchema>) {
     role: "CUSTOMER",
     ...(q.q && {
       OR: [
-        { email: { contains: q.q, mode: "insensitive" } },
-        { firstName: { contains: q.q, mode: "insensitive" } },
-        { lastName: { contains: q.q, mode: "insensitive" } },
+        { email: { contains: q.q } },
+        { firstName: { contains: q.q } },
+        { lastName: { contains: q.q } },
       ],
     }),
   };
@@ -460,7 +462,8 @@ export async function saveCoupon(adminId: string, data: z.infer<typeof V.couponS
 // ─────────────── Configuración ───────────────
 
 export async function saveSettings(adminId: string, data: z.infer<typeof V.settingsSchema>) {
-  const s = await prisma.storeSettings.upsert({ where: { id: 1 }, update: data, create: { id: 1, ...data } });
+  const payload = { ...data, closedWeekdays: [...new Set(data.closedWeekdays)].sort() };
+  const s = await prisma.storeSettings.upsert({ where: { id: 1 }, update: payload, create: { id: 1, ...payload } });
   await audit({ userId: adminId, action: "settings.update", entity: "StoreSettings", entityId: "1" });
   return s;
 }

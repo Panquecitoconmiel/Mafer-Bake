@@ -63,8 +63,8 @@ export async function listProducts(q: z.infer<typeof productQuerySchema>) {
   if (q.q) {
     and.push({
       OR: [
-        { name: { contains: q.q, mode: "insensitive" } },
-        { shortDescription: { contains: q.q, mode: "insensitive" } },
+        { name: { contains: q.q } },
+        { shortDescription: { contains: q.q } },
       ],
     });
   }

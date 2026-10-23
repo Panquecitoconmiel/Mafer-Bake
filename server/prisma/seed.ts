@@ -5,11 +5,11 @@
  * El script es idempotente: actualiza por slug y no borra pedidos ni usuarios.
  */
 import "dotenv/config";
-import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient, type InventoryMode, type OptionType } from "@prisma/client";
+import { mysqlAdapter } from "../src/config/mysql.js";
 
 const url = process.env.SEED_DATABASE_URL ?? process.env.DATABASE_URL!;
-const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: url }) });
+const prisma = new PrismaClient({ adapter: mysqlAdapter(url) });
 
 const categories = [
   { slug: "cupcakes", name: "Cupcakes", description: "Pequeños, esponjosos y decorados a mano.", sortOrder: 1 },
@@ -147,7 +147,7 @@ const products: Seed[] = [
 ];
 
 async function main() {
-  await prisma.storeSettings.upsert({ where: { id: 1 }, update: {}, create: { id: 1 } });
+  await prisma.storeSettings.upsert({ where: { id: 1 }, update: {}, create: { id: 1, closedWeekdays: [] } });
 
   const catIds = new Map<string, string>();
   for (const c of categories) {

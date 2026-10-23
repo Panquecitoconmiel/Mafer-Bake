@@ -1,6 +1,6 @@
 # Despliegue de Mafer
 
-Mafer son dos piezas: una **API Node.js** con PostgreSQL y un **frontend estático** (archivos de `client/dist`).
+Mafer son dos piezas: una **API Node.js** con MySQL 8 y un **frontend estático** (archivos de `client/dist`).
 
 ## Opción recomendada: mismo dominio con proxy inverso
 
@@ -24,7 +24,7 @@ Si usas dominios distintos (p. ej. `app.mafer.mx` y `api.mafer.mx`), deben compa
 |---|---|
 | API | Node.js ≥ 20.19, proceso persistente (no funciona como funciones efímeras sin adaptar: hay limpieza periódica de sesiones y subida de archivos a disco). |
 | Imágenes subidas | Se guardan en `server/uploads/`. En plataformas con disco efímero, monta un volumen persistente o migra a almacenamiento de objetos (pendiente). |
-| PostgreSQL | 14+. Servicio administrado con copias de seguridad automáticas. |
+| MySQL | 8.0+ con `utf8mb4`. Servicio administrado con copias de seguridad automáticas (p. ej. Railway, Aiven, DigitalOcean, AWS RDS). Verifica que el plan permita conexiones externas desde tu API. |
 | HTTPS | Obligatorio en producción (cookies `Secure` y webhooks de Stripe). |
 
 ## Pasos
@@ -35,7 +35,7 @@ pnpm build
 
 # Variables de la API (ver server/.env.example)
 NODE_ENV=production
-DATABASE_URL=postgresql://...
+DATABASE_URL=mysql://usuario:contraseña@host:3306/mafer
 CLIENT_URL=https://mafer.mx
 STRIPE_SECRET_KEY=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
@@ -60,11 +60,12 @@ El frontend se publica copiando `client/dist/` al hosting estático, con *fallba
 
 ## Copias de seguridad
 
-- Usa los respaldos automáticos del proveedor (retención mínima de 7 días) **y** un `pg_dump` diario externo:
+- Usa los respaldos automáticos del proveedor (retención mínima de 7 días) **y** un respaldo diario externo con `mysqldump`:
   ```bash
-  pg_dump --format=custom "$DATABASE_URL" > mafer-$(date +%F).dump
+  mysqldump --single-transaction --routines -h HOST -u USUARIO -p mafer > mafer-$(date +%F).sql
   ```
-- Prueba la restauración periódicamente con `pg_restore` en una base aparte.
+- Prueba la restauración periódicamente (`mysql -u USUARIO -p mafer_restaurada < respaldo.sql`) en una base aparte.
+- Nota Windows → Linux: MySQL en Windows guarda los nombres de tabla en minúsculas. Si migras datos de tu equipo a un servidor Linux, crea el esquema en producción con `pnpm db:deploy` y copia solo los datos.
 - Respalda también la carpeta `uploads/` si guardas imágenes en disco.
 
 ## Lista de verificación previa a producción

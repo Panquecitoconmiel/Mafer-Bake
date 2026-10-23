@@ -204,3 +204,33 @@ describe("pedidos", () => {
     expect((await agent.post("/api/v1/orders").send(orderBody({ deliveryMethod: "DELIVERY", expectedTotalCents: 13000 }))).status).toBe(400);
   });
 });
+
+describe("configuración de la tienda", () => {
+  const settingsBody = {
+    storeName: "Mafer", slogan: "Pequeños antojos, grandes momentos", pickupEnabled: true, deliveryEnabled: false,
+    minLeadHours: 24, maxAdvanceDays: 60, closedWeekdays: [0, 0, 1], pricesIncludeTax: true,
+  };
+
+  it("el administrador guarda días sin servicio y se aplican a la disponibilidad", async () => {
+    await createUser("admin@example.com", "ADMIN");
+    const admin = await login("admin@example.com");
+    const res = await admin.put("/api/v1/admin/settings").send(settingsBody);
+    expect(res.status).toBe(200);
+    expect(res.body.settings.closedWeekdays).toEqual([0, 1]);
+
+    const store = await request(app).get("/api/v1/store");
+    expect(store.body.settings.closedWeekdays).toEqual([0, 1]);
+
+    let sunday = futureDate(3);
+    while (new Date(`${sunday}T12:00:00Z`).getUTCDay() !== 0) sunday = new Date(Date.parse(`${sunday}T12:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
+    const avail = await request(app).get(`/api/v1/availability?date=${sunday}`);
+    expect(avail.body.closedReason).toMatch(/día de la semana/);
+  });
+
+  it("rechaza campos internos y entrega a domicilio sin costo definido", async () => {
+    await createUser("admin@example.com", "ADMIN");
+    const admin = await login("admin@example.com");
+    expect((await admin.put("/api/v1/admin/settings").send({ ...settingsBody, id: 5 })).status).toBe(400);
+    expect((await admin.put("/api/v1/admin/settings").send({ ...settingsBody, deliveryEnabled: true })).status).toBe(400);
+  });
+});

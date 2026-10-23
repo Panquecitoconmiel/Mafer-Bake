@@ -1,6 +1,6 @@
-import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 import { env } from "./env.js";
+import { mysqlAdapter } from "./mysql.js";
 
 if (env.isTest && (!env.TEST_DATABASE_URL || env.TEST_DATABASE_URL === env.DATABASE_URL)) {
   // Las pruebas vacían la base: nunca deben apuntar a la de desarrollo o producción.
@@ -9,7 +9,7 @@ if (env.isTest && (!env.TEST_DATABASE_URL || env.TEST_DATABASE_URL === env.DATAB
 const connectionString = env.isTest ? env.TEST_DATABASE_URL! : env.DATABASE_URL;
 
 export const prisma = new PrismaClient({
-  adapter: new PrismaPg({ connectionString }),
+  adapter: mysqlAdapter(connectionString),
   log: env.isProd ? ["error"] : ["warn", "error"],
 });
 

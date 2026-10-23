@@ -8,9 +8,9 @@ Tienda web de Mafer: catálogo de cupcakes, pasteles, galletas y postres persona
 |---|---|
 | Frontend | React 19, TypeScript, Vite 7, Tailwind CSS 4, TanStack Query, React Router 7 |
 | Backend | Node.js (≥ 20.19), Express 5, TypeScript, Zod |
-| Base de datos | PostgreSQL 16 + Prisma 6 (cliente sin binario nativo, con adaptador `pg`) |
+| Base de datos | MySQL 8 + Prisma 6 (cliente sin binario nativo, con adaptador de MySQL/MariaDB) |
 | Pagos | Stripe Checkout + webhooks firmados |
-| Pruebas | Vitest + Supertest (integración contra PostgreSQL real) |
+| Pruebas | Vitest + Supertest (integración contra MySQL real) |
 | Paquetes | **pnpm** (workspaces) |
 
 ## Estructura
@@ -30,7 +30,7 @@ mafer/
 │       ├── styles/         # Tokens de marca (Tailwind @theme)
 │       └── types/
 ├── server/                 # API REST /api/v1
-│   ├── prisma/             # schema.prisma, migraciones y seed
+│   ├── prisma/             # schema.prisma, migraciones (se generan con db:migrate) y seed
 │   ├── src/
 │   │   ├── config/         # Entorno, Prisma, Stripe
 │   │   ├── controllers/    # Capa HTTP
@@ -47,7 +47,7 @@ mafer/
 
 ## Puesta en marcha (desarrollo)
 
-Requisitos: Node.js 20.19 o superior, pnpm 10 y PostgreSQL 14+.
+Requisitos: Node.js 20.19 o superior, pnpm 10 y **MySQL 8.0** o superior.
 
 ```bash
 # 1. Dependencias (también genera el cliente de Prisma)
@@ -57,13 +57,18 @@ pnpm install
 cp server/.env.example server/.env
 cp client/.env.example client/.env
 #    Edita server/.env: DATABASE_URL y TEST_DATABASE_URL (bases distintas)
+#    Formato: mysql://root:TU_CONTRASEÑA@localhost:3306/mafer
+```
 
-# 3. Bases de datos
-createdb mafer
-createdb mafer_test
+```sql
+-- 3. Bases de datos (en MySQL Workbench o en la consola `mysql -u root -p`)
+CREATE DATABASE mafer CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE mafer_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
 
-# 4. Migraciones y datos de demostración
-pnpm db:migrate          # aplica prisma/migrations a la base de desarrollo
+```bash
+# 4. Tablas y datos de demostración
+pnpm db:migrate          # la primera vez crea la migración: escribe "init" cuando pregunte el nombre
 pnpm db:seed             # 8 categorías, 10 productos, 3 franjas horarias (demostración)
 
 # 5. Primer administrador (único camino para crear administradores)
@@ -78,10 +83,18 @@ pnpm dev
 - Panel: http://localhost:5173/admin
 - API: http://localhost:4000/api/v1 (Vite la sirve en el mismo origen mediante proxy)
 
-Para que la base de pruebas tenga el esquema:
+La primera vez, `pnpm db:migrate` crea la carpeta `server/prisma/migrations/`. **Súbela al repositorio** (`git add server/prisma/migrations && git commit -m "Migración inicial" && git push`): es la que se usará en producción.
+
+Para que la base de pruebas tenga las mismas tablas:
+
+```powershell
+# Windows PowerShell
+$env:DATABASE_URL="mysql://root:TU_CONTRASEÑA@localhost:3306/mafer_test"; pnpm --filter ./server exec prisma migrate deploy; Remove-Item Env:DATABASE_URL
+```
 
 ```bash
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/mafer_test pnpm --filter ./server exec prisma migrate deploy
+# macOS / Linux
+DATABASE_URL=mysql://root:TU_CONTRASEÑA@localhost:3306/mafer_test pnpm --filter ./server exec prisma migrate deploy
 ```
 
 ### Comandos
@@ -113,7 +126,8 @@ Sin `STRIPE_SECRET_KEY` la tienda funciona completa, pero el botón «Confirmar 
 - **Inventario**: los productos con existencias se *apartan* al crear el pedido (decremento condicional, nunca negativo) y se *liberan* si el pago expira, falla o el pedido se cancela antes de prepararse. Un reembolso **no** devuelve existencias.
 - **Sesiones** en base de datos con cookie `HttpOnly` + `SameSite=Lax` (`Secure` en producción); solo se guarda el hash del token. CSRF mitigado con verificación de `Origin`.
 - **Precios con impuestos incluidos** por defecto; tasa, envío, horarios y datos de contacto se configuran en el panel (no se inventan).
-- **Cliente de Prisma sin binario nativo** (`engineType = "client"` + `@prisma/adapter-pg`): simplifica despliegues en contenedores y plataformas *serverless*.
+- **MySQL 8**: la búsqueda no distingue mayúsculas ni acentos (intercalación `utf8mb4`); el cupo por horario se protege con `SELECT … FOR UPDATE` dentro de la transacción del pedido.
+- **Cliente de Prisma sin binario nativo** (`engineType = "client"` + `@prisma/adapter-mariadb`, compatible con MySQL): simplifica despliegues en contenedores.
 
 ## Estado de esta primera versión
 

@@ -1,11 +1,11 @@
-import type { Order, Prisma, StoreSettings } from "@prisma/client";
+import type { Order, Prisma } from "@prisma/client";
 import { env } from "../config/env.js";
 import { prisma, type Tx } from "../config/prisma.js";
 import { badRequest, conflict, notFound } from "../utils/errors.js";
 import { orderNumber, parseDateOnly, toDateOnly } from "../utils/format.js";
 import { getCartView, type CartView } from "./cart.service.js";
 import { couponDiscount } from "./pricing.service.js";
-import { assertSlotAvailable, getSettings } from "./settings.service.js";
+import { assertSlotAvailable, getSettings, type Settings } from "./settings.service.js";
 
 export interface CheckoutInput {
   deliveryMethod: "PICKUP" | "DELIVERY";
@@ -34,7 +34,7 @@ export async function validateCoupon(tx: Tx, code: string, userId: string, subto
   return coupon;
 }
 
-function deliveryRules(settings: StoreSettings, method: CheckoutInput["deliveryMethod"]) {
+function deliveryRules(settings: Settings, method: CheckoutInput["deliveryMethod"]) {
   if (method === "PICKUP" && !settings.pickupEnabled) throw badRequest("La recogida en tienda no está disponible.");
   if (method === "DELIVERY" && (!settings.deliveryEnabled || settings.deliveryFeeCents == null)) {
     throw badRequest("La entrega a domicilio no está disponible por el momento.");
@@ -42,7 +42,7 @@ function deliveryRules(settings: StoreSettings, method: CheckoutInput["deliveryM
 }
 
 /** Calcula los importes del pedido con datos del servidor. */
-export async function computeTotals(tx: Tx, userId: string, view: CartView, input: CheckoutInput, settings: StoreSettings, strictCoupon: boolean) {
+export async function computeTotals(tx: Tx, userId: string, view: CartView, input: CheckoutInput, settings: Settings, strictCoupon: boolean) {
   const subtotalCents = view.subtotalCents;
   let discountCents = 0;
   let coupon: Awaited<ReturnType<typeof validateCoupon>> | null = null;
@@ -157,8 +157,9 @@ export async function createOrder(
         addressSnapshot = snap;
       }
 
-      // Serializa la validación de cupo por fecha+franja entre pedidos simultáneos.
-      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`${input.requestedDate}|${input.slotId}`}))`;
+      // Serializa la validación de cupo entre pedidos simultáneos: bloquea la fila de la
+      // franja horaria hasta que termine la transacción (SELECT … FOR UPDATE en MySQL).
+      await tx.$queryRaw`SELECT id FROM DeliverySlot WHERE id = ${input.slotId} FOR UPDATE`;
       const leadHours = Math.max(settings.minLeadHours, view.maxPrepTimeHours);
       await assertSlotAvailable(input.requestedDate, input.slotId, leadHours, tx);
       const slot = await tx.deliverySlot.findUniqueOrThrow({ where: { id: input.slotId } });

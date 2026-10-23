@@ -1,14 +1,14 @@
 # Estado del proyecto — primera versión
 
-Fecha: 22 de octubre de 2026.
+Fecha: 22 de octubre de 2026. Base de datos: **MySQL 8** (se migró desde PostgreSQL a petición del proyecto).
 
 ## Verificado en esta ejecución
 
-Entorno: PostgreSQL 16 local, Node 22, pnpm 10.28.
+Entorno: MySQL 8.0.46 local, Node 22, pnpm 10.28.
 
 - `pnpm typecheck` sin errores en cliente y servidor.
 - `pnpm build` compila backend y frontend; la API compilada arranca y responde.
-- **48 pruebas automatizadas pasando** (43 de integración del backend contra PostgreSQL + 5 unitarias del frontend):
+- **50 pruebas automatizadas pasando** (45 de integración del backend contra MySQL 8, repetidas varias veces sin fallos intermitentes, + 5 unitarias del frontend):
   - Registro (siempre cliente, rechaza `role`), validaciones, correo duplicado.
   - Inicio de sesión con mensaje genérico, bloqueo tras 5 intentos, cierre de sesión en servidor.
   - Recuperación de contraseña con token de un solo uso y expiración; verificación de correo.
@@ -16,6 +16,7 @@ Entorno: PostgreSQL 16 local, Node 22, pnpm 10.28.
   - Catálogo: solo publicados, filtros de búsqueda, categoría y precio.
   - Carrito: precios calculados en servidor con variantes y opciones, rechazo de precios enviados por el cliente, opciones inválidas, existencias, cambios de precio, fusión del carrito de invitado.
   - Pedidos: creación con apartado de inventario, idempotencia, aviso de cambio de total, días bloqueados, **venta concurrente de las últimas unidades**, cupones con límite de usos, acceso a pedidos ajenos (404), cancelación con liberación, reglas de entrega a domicilio.
+  - Configuración de la tienda: días sin servicio guardados como JSON y aplicados a la disponibilidad; rechazo de campos internos.
   - Stripe (cliente simulado + firmas reales del SDK): importes de Checkout desde el servidor, reutilización de sesión, la página de éxito no marca pagado, **firma inválida rechazada**, **eventos duplicados ignorados**, pagos asíncronos, importe alterado rechazado, expiración que libera inventario, reembolsos parciales sin reabastecer, clientes sin acceso a reembolsos, transiciones de pedido válidas y auditoría.
 - Recorrido en navegador (Chromium headless): portada, catálogo, personalización del pastel (total estimado = total del servidor), carrito, registro con conservación del carrito, checkout con fecha y horario, menú móvil, inicio de sesión de administrador y dashboard. Sin errores de consola.
 
@@ -31,7 +32,7 @@ Entorno: PostgreSQL 16 local, Node 22, pnpm 10.28.
 ## No verificado aquí (falta configuración externa)
 
 - **Pago real de prueba con Stripe**: no hay claves en este entorno. El flujo está cubierto con un doble de prueba; al poner tus claves `sk_test_` y ejecutar `stripe listen`, prueba con la tarjeta `4242…` (ver STRIPE.md).
-- **`prisma migrate dev` / `migrate deploy`**: el entorno de desarrollo bloqueaba la descarga del motor nativo de Prisma. La migración se generó con `prisma migrate diff` y se aplicó con `psql`. En tu equipo estos comandos funcionan con normalidad.
+- **Migración de MySQL**: el entorno de desarrollo bloqueaba la descarga del motor nativo de Prisma y su versión WebAssembly no soporta MySQL. Para las pruebas, las tablas se crearon a partir de la definición oficial del esquema (`get_dmmf`). **La migración versionada se genera en tu equipo** con `pnpm db:migrate` (nombre: `init`) y debe subirse al repositorio.
 - **Tipografías de Google Fonts**: bloqueadas en este entorno; las capturas usan la tipografía de respaldo.
 
 ## Pendiente (siguientes etapas)

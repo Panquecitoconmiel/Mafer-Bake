@@ -1,15 +1,15 @@
-// Esquema de base de datos de Mafer — PostgreSQL + Prisma
+// Esquema de base de datos de Mafer — MySQL 8 + Prisma
 // Convención monetaria: todos los importes se guardan en centavos (Int), moneda MXN.
 // Esto coincide con la unidad mínima que usa Stripe (unit_amount).
 
 generator client {
   provider   = "prisma-client-js"
-  // Cliente sin binario nativo: usa el adaptador "pg" (ver src/config/prisma.ts)
+  // Cliente sin binario nativo: usa el adaptador de MySQL/MariaDB (ver src/config/prisma.ts)
   engineType = "client"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -122,7 +122,7 @@ model Session {
   id        String   @id // sha256(token)
   userId    String
   expiresAt DateTime
-  userAgent String?
+  userAgent String?  @db.VarChar(255)
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -157,7 +157,7 @@ model Address {
   city         String
   state        String
   postalCode   String
-  references   String?
+  references   String?  @db.VarChar(255)
   isDefault    Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -172,8 +172,8 @@ model Category {
   id          String    @id @default(cuid())
   name        String
   slug        String    @unique
-  description String?
-  imageUrl    String?
+  description String?   @db.Text
+  imageUrl    String?   @db.VarChar(500)
   sortOrder   Int       @default(0)
   isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
@@ -185,8 +185,8 @@ model Product {
   id                String        @id @default(cuid())
   name              String
   slug              String        @unique
-  shortDescription  String
-  description       String
+  shortDescription  String        @db.VarChar(255)
+  description       String        @db.Text
   priceCents        Int
   salePriceCents    Int?
   categoryId        String
@@ -219,8 +219,8 @@ model Product {
 model ProductImage {
   id        String  @id @default(cuid())
   productId String
-  url       String
-  alt       String
+  url       String  @db.VarChar(500)
+  alt       String  @db.VarChar(255)
   sortOrder Int     @default(0)
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
@@ -275,7 +275,7 @@ model ProductReview {
   productId  String
   userId     String
   rating     Int
-  comment    String?
+  comment    String?  @db.Text
   isApproved Boolean  @default(false)
   createdAt  DateTime @default(now())
   product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -313,7 +313,7 @@ model CartItem {
   variantId     String?
   quantity      Int
   /// Selecciones del cliente: { [optionId]: string | string[] }
-  selections    Json            @default("{}")
+  selections    Json
   /// Huella de producto+variante+selecciones para agrupar artículos idénticos
   configKey     String
   createdAt     DateTime        @default(now())
@@ -346,8 +346,8 @@ model Order {
   totalCents      Int
   currency        String         @default("mxn")
   couponCode      String?
-  customerNotes   String?
-  adminNotes      String?
+  customerNotes   String?        @db.Text
+  adminNotes      String?        @db.Text
   idempotencyKey  String         @unique
   /// true cuando el inventario apartado ya se liberó (evita liberar dos veces)
   stockReleased   Boolean        @default(false)
@@ -375,7 +375,7 @@ model OrderItem {
   variantId      String?
   productName    String
   variantName    String?
-  imageUrl       String?
+  imageUrl       String?                  @db.VarChar(500)
   unitPriceCents Int
   quantity       Int
   lineTotalCents Int
@@ -393,7 +393,7 @@ model OrderItemCustomization {
   id              String    @id @default(cuid())
   orderItemId     String
   optionName      String
-  value           String
+  value           String    @db.Text
   priceDeltaCents Int       @default(0)
   orderItem       OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
 
@@ -406,7 +406,7 @@ model Payment {
   provider                String        @default("stripe")
   stripeCheckoutSessionId String        @unique
   stripePaymentIntentId   String?       @unique
-  checkoutUrl             String?
+  checkoutUrl             String?       @db.Text
   expiresAt               DateTime?
   amountCents             Int
   refundedCents           Int           @default(0)
@@ -426,7 +426,7 @@ model Refund {
   paymentId      String
   stripeRefundId String?      @unique
   amountCents    Int
-  reason         String?
+  reason         String?      @db.VarChar(255)
   status         RefundStatus @default(PENDING)
   createdById    String?
   createdAt      DateTime     @default(now())
@@ -442,7 +442,7 @@ model Refund {
 model Coupon {
   id               String             @id @default(cuid())
   code             String             @unique // siempre en mayúsculas
-  description      String?
+  description      String?            @db.VarChar(255)
   type             CouponType
   value            Int // porcentaje (1-100) o centavos
   minSubtotalCents Int?
@@ -478,7 +478,7 @@ model InventoryMovement {
   type      InventoryMovementType
   quantity  Int // positivo = entrada, negativo = salida
   stockAfter Int
-  reason    String
+  reason    String                @db.VarChar(255)
   orderId   String?
   userId    String?
   createdAt DateTime              @default(now())
@@ -521,21 +521,22 @@ model StoreSettings {
   contactEmail             String?
   contactPhone             String?
   whatsapp                 String?
-  instagramUrl             String?
-  facebookUrl              String?
-  pickupAddress            String?
-  businessHours            String?
+  instagramUrl             String?  @db.VarChar(255)
+  facebookUrl              String?  @db.VarChar(255)
+  pickupAddress            String?  @db.Text
+  businessHours            String?  @db.Text
   pickupEnabled            Boolean  @default(true)
   deliveryEnabled          Boolean  @default(false)
   deliveryFeeCents         Int?
   freeDeliveryMinCents     Int?
-  deliveryCoverage         String? // descripción de zonas de cobertura
+  deliveryCoverage         String?  @db.Text // descripción de zonas de cobertura
   minLeadHours             Int      @default(24)
   maxAdvanceDays           Int      @default(60)
-  closedWeekdays           Int[]    @default([]) // 0 = domingo … 6 = sábado
+  /// Lista JSON de días sin servicio: 0 = domingo … 6 = sábado. Ej.: [0]
+  closedWeekdays           Json?
   pricesIncludeTax         Boolean  @default(true)
   taxRatePercent           Decimal? @db.Decimal(5, 2) // solo si los precios NO incluyen impuestos
-  cancellationPolicy       String?
+  cancellationPolicy       String?  @db.Text
   updatedAt                DateTime @updatedAt
 }
 
