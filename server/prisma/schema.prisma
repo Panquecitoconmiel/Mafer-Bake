@@ -1,0 +1,563 @@
+// Esquema de base de datos de Mafer — PostgreSQL + Prisma
+// Convención monetaria: todos los importes se guardan en centavos (Int), moneda MXN.
+// Esto coincide con la unidad mínima que usa Stripe (unit_amount).
+
+generator client {
+  provider   = "prisma-client-js"
+  // Cliente sin binario nativo: usa el adaptador "pg" (ver src/config/prisma.ts)
+  engineType = "client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────── Enumeraciones ───────────────────────────
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum AuthTokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum InventoryMode {
+  TRACKED // existencias cuantificables
+  MADE_TO_ORDER // se prepara bajo pedido
+}
+
+enum OptionType {
+  SINGLE // una sola opción (p. ej. sabor del pan)
+  MULTIPLE // varias opciones (p. ej. decoraciones)
+  TEXT // texto libre (p. ej. mensaje en el pastel)
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  CONFIRMED
+  IN_PREPARATION
+  READY
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+  PARTIALLY_REFUNDED
+  REFUNDED
+}
+
+enum RefundStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+enum DeliveryMethod {
+  PICKUP
+  DELIVERY
+}
+
+enum CouponType {
+  PERCENT
+  FIXED
+}
+
+enum InventoryMovementType {
+  IN // entrada
+  OUT // salida manual
+  ADJUSTMENT // ajuste
+  RESERVATION // apartado al crear pedido
+  RELEASE // liberación por cancelación/expiración
+}
+
+// ─────────────────────────── Usuarios y acceso ───────────────────────────
+
+model User {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  passwordHash     String
+  firstName        String
+  lastName         String
+  phone            String?
+  role             Role      @default(CUSTOMER)
+  isActive         Boolean   @default(true)
+  emailVerifiedAt  DateTime?
+  failedLoginCount Int       @default(0)
+  lockedUntil      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  sessions          Session[]
+  authTokens        AuthToken[]
+  addresses         Address[]
+  cart              Cart?
+  favorites         Favorite[]
+  orders            Order[]
+  reviews           ProductReview[]
+  couponRedemptions CouponRedemption[]
+  auditLogs         AuditLog[]
+  refundsCreated    Refund[]
+  inventoryMoves    InventoryMovement[]
+
+  @@index([role])
+}
+
+/// Sesión de servidor. Solo se guarda el hash SHA-256 del token de la cookie.
+model Session {
+  id        String   @id // sha256(token)
+  userId    String
+  expiresAt DateTime
+  userAgent String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+/// Tokens de un solo uso para verificación de correo y recuperación de contraseña.
+model AuthToken {
+  id        String        @id @default(cuid())
+  userId    String
+  type      AuthTokenType
+  tokenHash String        @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime      @default(now())
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+}
+
+model Address {
+  id           String   @id @default(cuid())
+  userId       String
+  label        String // "Casa", "Oficina"
+  recipient    String
+  phone        String
+  street       String
+  extNumber    String
+  intNumber    String?
+  neighborhood String
+  city         String
+  state        String
+  postalCode   String
+  references   String?
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─────────────────────────── Catálogo ───────────────────────────
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  imageUrl    String?
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+}
+
+model Product {
+  id                String        @id @default(cuid())
+  name              String
+  slug              String        @unique
+  shortDescription  String
+  description       String
+  priceCents        Int
+  salePriceCents    Int?
+  categoryId        String
+  isFeatured        Boolean       @default(false)
+  status            ProductStatus @default(DRAFT)
+  isAvailable       Boolean       @default(true)
+  inventoryMode     InventoryMode @default(MADE_TO_ORDER)
+  stock             Int           @default(0)
+  lowStockThreshold Int           @default(5)
+  prepTimeHours     Int           @default(24)
+  soldCount         Int           @default(0) // se incrementa solo con pagos confirmados
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  category   Category            @relation(fields: [categoryId], references: [id])
+  images     ProductImage[]
+  variants   ProductVariant[]
+  options    ProductOption[]
+  cartItems  CartItem[]
+  favorites  Favorite[]
+  orderItems OrderItem[]
+  movements  InventoryMovement[]
+  reviews    ProductReview[]
+
+  @@index([categoryId])
+  @@index([status, isFeatured])
+  @@index([soldCount])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  url       String
+  alt       String
+  sortOrder Int     @default(0)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+/// Variante con ajuste de precio (p. ej. tamaño del pastel o número de piezas).
+model ProductVariant {
+  id              String      @id @default(cuid())
+  productId       String
+  name            String
+  priceDeltaCents Int         @default(0)
+  isActive        Boolean     @default(true)
+  sortOrder       Int         @default(0)
+  product         Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cartItems       CartItem[]
+  orderItems      OrderItem[]
+
+  @@index([productId])
+}
+
+/// Opción de personalización configurable por producto.
+model ProductOption {
+  id         String               @id @default(cuid())
+  productId  String
+  name       String
+  type       OptionType
+  isRequired Boolean              @default(false)
+  isActive   Boolean              @default(true)
+  maxLength  Int? // solo para TEXT
+  sortOrder  Int                  @default(0)
+  product    Product              @relation(fields: [productId], references: [id], onDelete: Cascade)
+  values     ProductOptionValue[]
+
+  @@index([productId])
+}
+
+model ProductOptionValue {
+  id              String        @id @default(cuid())
+  optionId        String
+  label           String
+  priceDeltaCents Int           @default(0)
+  isActive        Boolean       @default(true)
+  sortOrder       Int           @default(0)
+  option          ProductOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@index([optionId])
+}
+
+model ProductReview {
+  id         String   @id @default(cuid())
+  productId  String
+  userId     String
+  rating     Int
+  comment    String?
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId])
+}
+
+model Favorite {
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([userId, productId])
+}
+
+// ─────────────────────────── Carrito ───────────────────────────
+
+model Cart {
+  id         String     @id @default(cuid())
+  userId     String?    @unique
+  guestToken String?    @unique // hash del token de la cookie de invitado
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  user       User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items      CartItem[]
+}
+
+model CartItem {
+  id            String          @id @default(cuid())
+  cartId        String
+  productId     String
+  variantId     String?
+  quantity      Int
+  /// Selecciones del cliente: { [optionId]: string | string[] }
+  selections    Json            @default("{}")
+  /// Huella de producto+variante+selecciones para agrupar artículos idénticos
+  configKey     String
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  cart          Cart            @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product       Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant       ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
+  @@unique([cartId, configKey])
+}
+
+// ─────────────────────────── Pedidos y pagos ───────────────────────────
+
+model Order {
+  id              String         @id @default(cuid())
+  number          Int            @unique @default(autoincrement())
+  userId          String
+  status          OrderStatus    @default(PENDING_PAYMENT)
+  paymentStatus   PaymentStatus  @default(PENDING)
+  deliveryMethod  DeliveryMethod
+  /// Copia de la dirección al momento de la compra
+  addressSnapshot Json?
+  requestedDate   DateTime       @db.Date
+  requestedSlot   String
+  confirmedDate   DateTime?      @db.Date
+  subtotalCents   Int
+  discountCents   Int            @default(0)
+  shippingCents   Int            @default(0)
+  taxCents        Int            @default(0)
+  totalCents      Int
+  currency        String         @default("mxn")
+  couponCode      String?
+  customerNotes   String?
+  adminNotes      String?
+  idempotencyKey  String         @unique
+  /// true cuando el inventario apartado ya se liberó (evita liberar dos veces)
+  stockReleased   Boolean        @default(false)
+  paidAt          DateTime?
+  cancelledAt     DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  user              User               @relation(fields: [userId], references: [id])
+  items             OrderItem[]
+  payments          Payment[]
+  couponRedemption  CouponRedemption?
+  inventoryMoves    InventoryMovement[]
+
+  @@index([userId, createdAt])
+  @@index([status])
+  @@index([paymentStatus, paidAt])
+  @@index([requestedDate, requestedSlot])
+}
+
+model OrderItem {
+  id             String                   @id @default(cuid())
+  orderId        String
+  productId      String?
+  variantId      String?
+  productName    String
+  variantName    String?
+  imageUrl       String?
+  unitPriceCents Int
+  quantity       Int
+  lineTotalCents Int
+  order          Order                    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product        Product?                 @relation(fields: [productId], references: [id], onDelete: SetNull)
+  variant        ProductVariant?          @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  customizations OrderItemCustomization[]
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+/// Copia inmutable de cada personalización elegida.
+model OrderItemCustomization {
+  id              String    @id @default(cuid())
+  orderItemId     String
+  optionName      String
+  value           String
+  priceDeltaCents Int       @default(0)
+  orderItem       OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+
+  @@index([orderItemId])
+}
+
+model Payment {
+  id                      String        @id @default(cuid())
+  orderId                 String
+  provider                String        @default("stripe")
+  stripeCheckoutSessionId String        @unique
+  stripePaymentIntentId   String?       @unique
+  checkoutUrl             String?
+  expiresAt               DateTime?
+  amountCents             Int
+  refundedCents           Int           @default(0)
+  currency                String
+  status                  PaymentStatus @default(PENDING)
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+  order                   Order         @relation(fields: [orderId], references: [id])
+  refunds                 Refund[]
+
+  @@index([orderId])
+  @@index([status])
+}
+
+model Refund {
+  id             String       @id @default(cuid())
+  paymentId      String
+  stripeRefundId String?      @unique
+  amountCents    Int
+  reason         String?
+  status         RefundStatus @default(PENDING)
+  createdById    String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  payment        Payment      @relation(fields: [paymentId], references: [id])
+  createdBy      User?        @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([paymentId])
+}
+
+// ─────────────────────────── Promociones ───────────────────────────
+
+model Coupon {
+  id               String             @id @default(cuid())
+  code             String             @unique // siempre en mayúsculas
+  description      String?
+  type             CouponType
+  value            Int // porcentaje (1-100) o centavos
+  minSubtotalCents Int?
+  startsAt         DateTime?
+  endsAt           DateTime?
+  maxUses          Int?
+  maxUsesPerUser   Int?
+  usedCount        Int                @default(0)
+  isActive         Boolean            @default(true)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  redemptions      CouponRedemption[]
+}
+
+model CouponRedemption {
+  id        String   @id @default(cuid())
+  couponId  String
+  userId    String
+  orderId   String   @unique
+  createdAt DateTime @default(now())
+  coupon    Coupon   @relation(fields: [couponId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([couponId, userId])
+}
+
+// ─────────────────────────── Inventario ───────────────────────────
+
+model InventoryMovement {
+  id        String                @id @default(cuid())
+  productId String
+  type      InventoryMovementType
+  quantity  Int // positivo = entrada, negativo = salida
+  stockAfter Int
+  reason    String
+  orderId   String?
+  userId    String?
+  createdAt DateTime              @default(now())
+  product   Product               @relation(fields: [productId], references: [id], onDelete: Cascade)
+  order     Order?                @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  user      User?                 @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([productId, createdAt])
+  @@index([orderId])
+}
+
+// ─────────────────────────── Entregas y configuración ───────────────────────────
+
+/// Franja horaria de entrega o recogida.
+model DeliverySlot {
+  id        String   @id @default(cuid())
+  label     String // "10:00 – 13:00"
+  startTime String // "10:00"
+  endTime   String // "13:00"
+  capacity  Int // pedidos máximos por día en esta franja
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+/// Días sin servicio (vacaciones, días festivos).
+model BlockedDate {
+  id     String   @id @default(cuid())
+  date   DateTime @unique @db.Date
+  reason String?
+}
+
+/// Configuración de la tienda (registro único id = 1).
+/// Ningún dato comercial real se inventa: los campos opcionales quedan vacíos
+/// hasta que el administrador los configure.
+model StoreSettings {
+  id                       Int      @id @default(1)
+  storeName                String   @default("Mafer")
+  slogan                   String   @default("Pequeños antojos, grandes momentos")
+  contactEmail             String?
+  contactPhone             String?
+  whatsapp                 String?
+  instagramUrl             String?
+  facebookUrl              String?
+  pickupAddress            String?
+  businessHours            String?
+  pickupEnabled            Boolean  @default(true)
+  deliveryEnabled          Boolean  @default(false)
+  deliveryFeeCents         Int?
+  freeDeliveryMinCents     Int?
+  deliveryCoverage         String? // descripción de zonas de cobertura
+  minLeadHours             Int      @default(24)
+  maxAdvanceDays           Int      @default(60)
+  closedWeekdays           Int[]    @default([]) // 0 = domingo … 6 = sábado
+  pricesIncludeTax         Boolean  @default(true)
+  taxRatePercent           Decimal? @db.Decimal(5, 2) // solo si los precios NO incluyen impuestos
+  cancellationPolicy       String?
+  updatedAt                DateTime @updatedAt
+}
+
+// ─────────────────────────── Auditoría y webhooks ───────────────────────────
+
+/// Eventos de Stripe ya procesados (idempotencia de webhooks).
+model WebhookEvent {
+  id          String   @id // id del evento de Stripe (evt_…)
+  type        String
+  processedAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  entity    String
+  entityId  String?
+  details   Json?
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
