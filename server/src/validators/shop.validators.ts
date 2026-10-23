@@ -8,6 +8,7 @@ export const productQuerySchema = z.object({
   available: z.enum(["true", "false"]).optional(),
   featured: z.enum(["true", "false"]).optional(),
   onSale: z.enum(["true", "false"]).optional(),
+  bestSellers: z.enum(["true", "false"]).optional(),
   sort: z.enum(["popular", "newest", "price_asc", "price_desc", "name"]).default("popular"),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(48).default(12),

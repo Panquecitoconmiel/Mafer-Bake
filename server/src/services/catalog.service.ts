@@ -71,6 +71,8 @@ export async function listProducts(q: z.infer<typeof productQuerySchema>) {
   if (q.category) and.push({ category: { slug: q.category } });
   if (q.featured === "true") and.push({ isFeatured: true });
   if (q.onSale === "true") and.push({ salePriceCents: { not: null } });
+  // Más vendidos: solo productos con ventas confirmadas (soldCount crece únicamente con pagos verificados).
+  if (q.bestSellers === "true") and.push({ soldCount: { gt: 0 } });
   if (q.available === "true") {
     and.push({ isAvailable: true, OR: [{ inventoryMode: "MADE_TO_ORDER" }, { stock: { gt: 0 } }] });
   }

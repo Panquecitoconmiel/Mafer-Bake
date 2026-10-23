@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+/* ───────── Tokens de marca Mafer ───────── */
+@theme {
+  --font-display: "Fraunces", "Georgia", serif;
+  --font-sans: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
+
+  /* Rosa pastel — color principal */
+  --color-rosa-50: #fdf3f5;
+  --color-rosa-100: #fbe6eb;
+  --color-rosa-200: #f6cad3;
+  /* Rosa empolvado — secundarios y detalles */
+  --color-empolvado: #e3a7b4;
+  /* Rosa oscuro — botones principales y estados activos (contraste AA sobre blanco) */
+  --color-rosa-600: #b04a64;
+  --color-rosa-700: #943a52;
+
+  /* Crema — fondos y superficies */
+  --color-crema-50: #fcf8f3;
+  --color-crema-100: #f7efe6;
+  --color-crema-200: #efe1d1;
+  --color-crema-300: #e2cdb8;
+
+  /* Café suave — textos y detalles */
+  --color-cafe-400: #a1806f;
+  --color-cafe-500: #7f5b4c;
+  --color-cafe-700: #5b3a2e;
+  --color-cafe-900: #3d261d;
+
+  --color-exito: #3f7d5a;
+  --color-aviso: #a86b12;
+  --color-error: #b3261e;
+
+  --radius-card: 1.25rem;
+  --shadow-suave: 0 1px 2px rgb(91 58 46 / 0.06), 0 6px 24px -8px rgb(91 58 46 / 0.14);
+  --shadow-elevada: 0 2px 4px rgb(91 58 46 / 0.06), 0 16px 40px -12px rgb(91 58 46 / 0.22);
+
+  --animate-aparecer: aparecer 0.35s ease-out both;
+}
+
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@layer base {
+  html { -webkit-tap-highlight-color: transparent; }
+  body {
+    @apply bg-crema-100 font-sans text-cafe-700 antialiased;
+    font-optical-sizing: auto;
+  }
+  h1, h2, h3, h4 { @apply font-display text-cafe-900; font-weight: 560; letter-spacing: -0.01em; }
+  :focus-visible { outline: 2px solid var(--color-rosa-600); outline-offset: 2px; border-radius: 6px; }
+  ::selection { background: var(--color-rosa-200); color: var(--color-cafe-900); }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+}
+
+/* Base de botones: declarada como utilidad para poder reutilizarla con @apply. */
+@utility btn {
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-bold whitespace-nowrap transition
+    disabled:cursor-not-allowed disabled:opacity-55 active:scale-[0.98];
+}
+
+@layer components {
+  .contenedor { @apply mx-auto w-full max-w-6xl px-4 sm:px-6; }
+
+  .btn-primario { @apply btn bg-rosa-600 text-white shadow-[0_6px_16px_-8px_rgb(176_74_100/0.7)] hover:bg-rosa-700; }
+  .btn-cafe { @apply btn bg-cafe-700 text-crema-50 hover:bg-cafe-900; }
+  .btn-secundario { @apply btn border border-empolvado bg-white text-cafe-700 hover:bg-rosa-50; }
+  .btn-fantasma { @apply btn text-cafe-700 hover:bg-crema-200; }
+  .btn-peligro { @apply btn bg-error text-white hover:brightness-95; }
+  .btn-sm { @apply min-h-9 px-4 text-xs; }
+
+  .tarjeta { @apply rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-suave)]; }
+
+  .etiqueta { @apply mb-1.5 block text-sm font-semibold text-cafe-700; }
+  .campo {
+    @apply block min-h-11 w-full rounded-xl border border-crema-300 bg-white px-3.5 text-[15px] text-cafe-900 transition
+      placeholder:text-cafe-400 hover:border-cafe-400 focus:border-rosa-600 focus:ring-2 focus:ring-rosa-200 focus:outline-none
+      disabled:bg-crema-50 aria-[invalid=true]:border-error;
+  }
+  textarea.campo { @apply py-2.5; }
+  .ayuda { @apply mt-1 text-xs text-cafe-500; }
+  .error-campo { @apply mt-1 text-xs font-semibold text-error; }
+
+  .chip {
+    @apply inline-flex min-h-9 items-center gap-1.5 rounded-full border border-crema-300 bg-white px-3.5 text-sm font-semibold text-cafe-700 transition hover:border-empolvado;
+  }
+  .chip[aria-pressed="true"], .chip[aria-current="page"] { @apply border-cafe-700 bg-cafe-700 text-crema-50; }
+
+  .titulo-seccion { @apply font-display text-2xl text-cafe-900 sm:text-3xl; }
+  .sobretitulo { @apply text-xs font-bold tracking-[0.18em] text-rosa-600 uppercase; }
+}

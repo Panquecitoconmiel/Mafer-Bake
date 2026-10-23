@@ -18,7 +18,7 @@ describe("registro", () => {
     const res = await agent.post("/api/v1/auth/register").send(valid);
     expect(res.status).toBe(201);
     expect(res.body.user.role).toBe("CUSTOMER");
-    expect(res.headers["set-cookie"].join(";")).toMatch(/mafer_sid=.*HttpOnly/i);
+    expect([res.headers["set-cookie"]].flat().join(";")).toMatch(/mafer_sid=.*HttpOnly/i);
     const me = await agent.get("/api/v1/auth/me");
     expect(me.body.user.email).toBe("ana@example.com");
     const stored = await prisma.user.findUniqueOrThrow({ where: { email: "ana@example.com" } });

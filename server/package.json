@@ -16,7 +16,8 @@
     "db:reset": "prisma migrate reset --force",
     "admin:create": "tsx --env-file-if-exists=.env src/scripts/create-admin.ts",
     "db:generate": "prisma generate",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/adapter-pg": "6.19.3",
