@@ -194,7 +194,7 @@ export function PaymentStatusBadge({ status }: { status: PaymentStatus }) {
   return <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${PAY_TONE[status]}`}>{PAYMENT_STATUS[status]}</span>;
 }
 
-export function ProductImage({ src, alt, className = "" }: { src?: string | null; alt: string; className?: string }) {
+export function ProductImage({ src, alt, className = "", fit = "contain" }: { src?: string | null; alt: string; className?: string; fit?: "contain" | "cover" }) {
   if (!src) {
     return (
       <div className={`grid place-items-center bg-rosa-50 text-empolvado ${className}`} aria-label={alt} role="img">
@@ -202,7 +202,7 @@ export function ProductImage({ src, alt, className = "" }: { src?: string | null
       </div>
     );
   }
-  return <img src={src} alt={alt} loading="lazy" className={`object-cover ${className}`} />;
+  return <img src={src} alt={alt} loading="lazy" className={`${fit === "cover" ? "object-cover" : "object-contain"} ${className}`} />;
 }
 
 export function Breadcrumbs({ items }: { items: { label: string; to?: string }[] }) {

@@ -114,7 +114,7 @@ export function AdminOrderDetail() {
             <ul className="divide-y divide-crema-100">
               {o.items?.map((i) => (
                 <li key={i.id} className="flex gap-4 py-3 text-sm">
-                  <ProductImage src={i.imageUrl} alt="" className="size-14 shrink-0 rounded-lg" />
+                  <ProductImage src={i.imageUrl} alt="" className="size-14 shrink-0 rounded-lg bg-rosa-100 p-1" />
                   <div className="flex-1">
                     <p className="font-bold">{i.productName} × {i.quantity}</p>
                     {i.variantName && <p className="text-cafe-500">{i.variantName}</p>}

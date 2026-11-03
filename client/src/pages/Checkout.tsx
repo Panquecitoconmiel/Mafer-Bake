@@ -232,7 +232,7 @@ export default function Checkout() {
             <ul className="mt-4 max-h-64 space-y-3 overflow-y-auto pr-1">
               {cart.items.map((i) => (
                 <li key={i.id} className="flex gap-3 text-sm">
-                  <ProductImage src={i.product.image} alt="" className="size-14 shrink-0 rounded-xl" />
+                  <ProductImage src={i.product.image} alt="" className="size-14 shrink-0 rounded-xl bg-rosa-100 p-1" />
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold leading-snug">{i.product.name} <span className="text-cafe-400">× {i.quantity}</span></p>
                     {i.variantName && <p className="text-xs text-cafe-500">{i.variantName}</p>}

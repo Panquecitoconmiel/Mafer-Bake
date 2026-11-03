@@ -27,7 +27,7 @@ export default function CartPage() {
             {cart.items.map((item) => (
               <li key={item.id} className={`tarjeta flex gap-4 p-4 ${item.issue ? "ring-2 ring-rosa-200" : ""}`}>
                 <Link to={`/producto/${item.product.slug}`} className="shrink-0">
-                  <ProductImage src={item.product.image} alt={item.product.name} className="size-24 rounded-2xl sm:size-28" />
+                  <ProductImage src={item.product.image} alt={item.product.name} className="size-24 rounded-2xl bg-rosa-100 p-1.5 sm:size-28" />
                 </Link>
                 <div className="flex min-w-0 flex-1 flex-col">
                   <div className="flex items-start justify-between gap-3">

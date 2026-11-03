@@ -13,9 +13,9 @@ function AuthShell({ title, subtitle, children, image = asset("/productos/vela-p
   return (
     <div className="contenedor flex justify-center py-8 sm:py-14">
       <div className="grid w-full max-w-4xl overflow-hidden rounded-[2rem] bg-crema-50 shadow-[var(--shadow-elevada)] md:grid-cols-2">
-        <div className="relative h-44 overflow-hidden md:h-auto">
-          <img src={image} alt="" className="size-full object-cover" />
-          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-crema-50 md:hidden" />
+        <div className="rayas relative grid h-48 place-items-center overflow-hidden md:h-auto">
+          <img src={image} alt="" className="h-[85%] w-auto max-w-[80%] object-contain drop-shadow-[0_16px_18px_rgb(122_77_58/0.22)] md:h-auto md:w-[72%]" />
+          
           <div className="absolute bottom-6 left-6 hidden rounded-2xl bg-white/85 px-4 py-3 backdrop-blur md:block">
             <Logo tagline />
           </div>

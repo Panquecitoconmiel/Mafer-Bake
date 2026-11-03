@@ -181,14 +181,14 @@ function ProductView({ product }: { product: Product }) {
       <div className="grid gap-10 lg:grid-cols-2">
         {/* Galería */}
         <div className="lg:sticky lg:top-32 lg:self-start">
-          <div className="overflow-hidden rounded-[1.75rem] bg-rosa-50 shadow-[var(--shadow-suave)]">
-            <ProductImage src={product.images[image]?.url} alt={product.images[image]?.alt ?? product.name} className="aspect-square w-full" />
+          <div className="overflow-hidden rounded-[1.75rem] bg-rosa-100 shadow-[var(--shadow-suave)]">
+            <ProductImage src={product.images[image]?.url} alt={product.images[image]?.alt ?? product.name} className="aspect-square w-full p-8 drop-shadow-[0_16px_18px_rgb(122_77_58/0.2)]" />
           </div>
           {product.images.length > 1 && (
             <div className="mt-3 flex gap-2">
               {product.images.map((img, i) => (
                 <button key={img.url} onClick={() => setImage(i)} aria-label={`Ver imagen ${i + 1}`} aria-pressed={image === i} className={`size-20 overflow-hidden rounded-xl border-2 ${image === i ? "border-rosa-600" : "border-transparent"}`}>
-                  <ProductImage src={img.url} alt="" className="size-full" />
+                  <ProductImage src={img.url} alt="" className="size-full bg-rosa-100 p-1" />
                 </button>
               ))}
             </div>

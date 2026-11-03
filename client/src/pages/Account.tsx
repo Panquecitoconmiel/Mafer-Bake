@@ -85,7 +85,7 @@ function OrderList({ orders }: { orders: NonNullable<ReturnType<typeof useOrders
         <li key={o.id}>
           <Link to={`/cuenta/pedidos/${o.id}`} className="tarjeta flex flex-wrap items-center gap-4 p-4 transition hover:bg-rosa-50">
             <div className="flex -space-x-3">
-              {o.items?.slice(0, 3).map((i) => <ProductImage key={i.id} src={i.imageUrl} alt="" className="size-12 rounded-full border-2 border-white" />)}
+              {o.items?.slice(0, 3).map((i) => <ProductImage key={i.id} src={i.imageUrl} alt="" className="size-12 rounded-full border-2 border-white bg-rosa-100 p-0.5" />)}
             </div>
             <div className="min-w-0 flex-1">
               <p className="font-bold">{o.number}</p>
@@ -203,7 +203,7 @@ export function AccountOrderDetail() {
         <ul className="divide-y divide-crema-200">
           {o.items?.map((i) => (
             <li key={i.id} className="flex gap-4 py-3">
-              <ProductImage src={i.imageUrl} alt="" className="size-16 shrink-0 rounded-xl" />
+              <ProductImage src={i.imageUrl} alt="" className="size-16 shrink-0 rounded-xl bg-rosa-100 p-1" />
               <div className="flex-1 text-sm">
                 <p className="font-bold">{i.productName} <span className="font-normal text-cafe-400">× {i.quantity}</span></p>
                 {i.variantName && <p className="text-cafe-500">{i.variantName}</p>}
@@ -280,7 +280,7 @@ export function AccountFavorites() {
         <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {data.map((f) => (
             <li key={f.productId} className="tarjeta overflow-hidden">
-              <Link to={`/producto/${f.slug}`}><ProductImage src={f.image} alt={f.name} className="aspect-[4/3] w-full" /></Link>
+              <Link to={`/producto/${f.slug}`}><ProductImage src={f.image} alt={f.name} className="aspect-[4/3] w-full bg-rosa-100 p-4" /></Link>
               <div className="flex items-center justify-between gap-2 p-4">
                 <div><Link to={`/producto/${f.slug}`} className="font-display text-lg hover:text-rosa-600">{f.name}</Link><p className="text-sm font-bold">{money(f.priceCents)}</p></div>
                 <button className="grid size-10 place-items-center rounded-full hover:bg-rosa-50" onClick={() => remove.mutate(f.productId)} aria-label={`Quitar ${f.name} de favoritos`}>

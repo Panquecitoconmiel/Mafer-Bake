@@ -50,7 +50,7 @@ export function AdminProducts() {
               <tr key={p.id} className="hover:bg-crema-50">
                 <td className="px-4 py-3">
                   <Link to={`/admin/productos/${p.id}`} className="flex items-center gap-3 font-semibold hover:text-rosa-600">
-                    <ProductImage src={p.images[0]?.url} alt="" className="size-11 shrink-0 rounded-lg" /> {p.name}
+                    <ProductImage src={p.images[0]?.url} alt="" className="size-11 shrink-0 rounded-lg bg-rosa-100 p-0.5" /> {p.name}
                   </Link>
                 </td>
                 <td className="px-4 py-3 text-cafe-500">{p.category.name}</td>
@@ -203,7 +203,7 @@ export function AdminProductForm() {
             <ul className="flex flex-wrap gap-3">
               {images.map((img, i) => (
                 <li key={img.url + i} className="relative">
-                  <ProductImage src={img.url} alt={img.alt} className="size-24 rounded-xl" />
+                  <ProductImage src={img.url} alt={img.alt} className="size-24 rounded-xl bg-rosa-100 p-1" />
                   <div className="absolute inset-x-1 bottom-1 flex justify-between">
                     <button type="button" className="grid size-7 place-items-center rounded-full bg-white/90 disabled:opacity-40" disabled={i === 0} onClick={() => setImages(move(images, i, -1))} aria-label="Mover antes"><ArrowUp className="size-3.5 -rotate-90" /></button>
                     <button type="button" className="grid size-7 place-items-center rounded-full bg-white/90 text-error" onClick={() => setImages(images.filter((_, k) => k !== i))} aria-label="Quitar imagen"><Trash2 className="size-3.5" /></button>

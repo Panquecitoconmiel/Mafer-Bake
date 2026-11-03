@@ -2,38 +2,49 @@
 
 /* ───────── Tokens de marca Mafer ───────── */
 @theme {
-  --font-display: "Fraunces", "Georgia", serif;
-  --font-sans: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
+  /* Tipografía redondeada y amigable para títulos; Nunito para lectura */
+  --font-display: "Fredoka Variable", "Fredoka", ui-rounded, sans-serif;
+  --font-sans: "Nunito Variable", "Nunito", ui-sans-serif, system-ui, sans-serif;
 
   /* Rosa pastel — color principal */
-  --color-rosa-50: #fdf3f5;
-  --color-rosa-100: #fbe6eb;
-  --color-rosa-200: #f6cad3;
+  --color-rosa-50: #fff5f6;
+  --color-rosa-100: #fbe3e6;
+  --color-rosa-200: #f6cdd3;
   /* Rosa empolvado — secundarios y detalles */
-  --color-empolvado: #e3a7b4;
-  /* Rosa oscuro — botones principales y estados activos (contraste AA sobre blanco) */
-  --color-rosa-600: #b04a64;
-  --color-rosa-700: #943a52;
+  --color-empolvado: #f1a9b2;
+  /* Rosa coral — botones principales y estados activos */
+  --color-rosa-600: #d4606f;
+  --color-rosa-700: #bd4b5b;
 
-  /* Crema — fondos y superficies */
-  --color-crema-50: #fcf8f3;
-  --color-crema-100: #f7efe6;
-  --color-crema-200: #efe1d1;
-  --color-crema-300: #e2cdb8;
+  /* Crema / vainilla — fondos y superficies */
+  --color-crema-50: #fffefa;
+  --color-crema-100: #fffcf4;
+  --color-crema-200: #f9f0d8;
+  --color-crema-300: #efe0bd;
 
-  /* Café suave — textos y detalles */
-  --color-cafe-400: #a1806f;
-  --color-cafe-500: #7f5b4c;
-  --color-cafe-700: #5b3a2e;
-  --color-cafe-900: #3d261d;
+  /* Café suave — textos */
+  --color-cafe-400: #b8917d;
+  --color-cafe-500: #966a55;
+  --color-cafe-700: #7a4d3a;
+  --color-cafe-900: #5c3727;
+
+  /* Acentos pastel (referencia aesthetic) */
+  --color-celeste: #d5e9f6;
+  --color-celeste-300: #a9d1ec;
+  --color-vainilla: #fbf5d9;
+  --color-coral: #e8797f;
+  --color-durazno: #eab98f;
+  --color-durazno-100: #fbeadb;
+  --color-menta: #4fa845;
+  --color-dorado: #e9b54d;
 
   --color-exito: #3f7d5a;
   --color-aviso: #a86b12;
   --color-error: #b3261e;
 
-  --radius-card: 1.25rem;
-  --shadow-suave: 0 1px 2px rgb(91 58 46 / 0.06), 0 6px 24px -8px rgb(91 58 46 / 0.14);
-  --shadow-elevada: 0 2px 4px rgb(91 58 46 / 0.06), 0 16px 40px -12px rgb(91 58 46 / 0.22);
+  --radius-card: 1.5rem;
+  --shadow-suave: 0 1px 2px rgb(122 77 58 / 0.05), 0 8px 24px -12px rgb(212 96 111 / 0.25);
+  --shadow-elevada: 0 2px 4px rgb(122 77 58 / 0.05), 0 18px 40px -16px rgb(212 96 111 / 0.35);
 
   --animate-aparecer: aparecer 0.35s ease-out both;
 }
@@ -49,7 +60,7 @@
     @apply bg-crema-100 font-sans text-cafe-700 antialiased;
     font-optical-sizing: auto;
   }
-  h1, h2, h3, h4 { @apply font-display text-cafe-900; font-weight: 560; letter-spacing: -0.01em; }
+  h1, h2, h3, h4 { @apply font-display text-cafe-900; font-weight: 600; letter-spacing: -0.005em; }
   :focus-visible { outline: 2px solid var(--color-rosa-600); outline-offset: 2px; border-radius: 6px; }
   ::selection { background: var(--color-rosa-200); color: var(--color-cafe-900); }
   @media (prefers-reduced-motion: reduce) {
@@ -91,5 +102,9 @@
   .chip[aria-pressed="true"], .chip[aria-current="page"] { @apply border-cafe-700 bg-cafe-700 text-crema-50; }
 
   .titulo-seccion { @apply font-display text-2xl text-cafe-900 sm:text-3xl; }
+  /* Títulos de sección estilo «✶˚ NOVEDADES ˚✶» */
+  .titulo-dulce { @apply font-display text-2xl font-semibold tracking-wide text-menta uppercase sm:text-[1.7rem]; }
+  /* Fondo de rayas azul y vainilla */
+  .rayas { background: repeating-linear-gradient(90deg, var(--color-celeste) 0 44px, var(--color-vainilla) 44px 88px); }
   .sobretitulo { @apply text-xs font-bold tracking-[0.18em] text-rosa-600 uppercase; }
 }
