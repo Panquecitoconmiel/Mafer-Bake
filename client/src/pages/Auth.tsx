@@ -76,7 +76,7 @@ export function Login() {
         <PasswordField label="Contraseña" value={password} onChange={setPassword} autoComplete="current-password" />
         <div className="text-right"><Link to="/recuperar-contrasena" className="text-sm font-semibold text-rosa-600 hover:underline">¿Olvidaste tu contraseña?</Link></div>
         {m.error && <Alert kind="error">{m.error instanceof ApiError ? m.error.message : "No pudimos iniciar sesión."}</Alert>}
-        <LoadingButton type="submit" loading={m.isPending} className="btn-cafe w-full">Entrar</LoadingButton>
+        <LoadingButton type="submit" loading={m.isPending} className="btn-primario w-full">Entrar</LoadingButton>
       </form>
       <p className="mt-6 text-center text-sm text-cafe-500">¿Aún no tienes cuenta? <Link to={`/registro${back ? `?volver=${back}` : ""}`} className="font-bold text-rosa-600 hover:underline">Crear una cuenta</Link></p>
     </AuthShell>
@@ -125,7 +125,7 @@ export function Register() {
           {err("acceptTerms") && <p className="error-campo">{err("acceptTerms")}</p>}
         </div>
         {m.error && <Alert kind="error">{(m.error as Error).message}</Alert>}
-        <LoadingButton type="submit" loading={m.isPending} className="btn-cafe w-full">Crear cuenta</LoadingButton>
+        <LoadingButton type="submit" loading={m.isPending} className="btn-primario w-full">Crear cuenta</LoadingButton>
       </form>
       <p className="mt-6 text-center text-sm text-cafe-500">¿Ya tienes cuenta? <Link to="/ingresar" className="font-bold text-rosa-600 hover:underline">Inicia sesión</Link></p>
     </AuthShell>
@@ -143,7 +143,7 @@ export function ForgotPassword() {
         <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); m.mutate(); }}>
           <Field label="Correo electrónico" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
           {m.error && <Alert kind="error">{(m.error as Error).message}</Alert>}
-          <LoadingButton type="submit" loading={m.isPending} className="btn-cafe w-full">Enviar enlace</LoadingButton>
+          <LoadingButton type="submit" loading={m.isPending} className="btn-primario w-full">Enviar enlace</LoadingButton>
         </form>
       )}
       <p className="mt-6 text-center text-sm"><Link to="/ingresar" className="font-bold text-rosa-600 hover:underline">Volver a iniciar sesión</Link></p>
@@ -165,14 +165,14 @@ export function ResetPassword() {
       ) : m.isSuccess ? (
         <div className="space-y-4">
           <Alert kind="exito">{m.data.message}</Alert>
-          <Link to="/ingresar" className="btn-cafe w-full">Iniciar sesión</Link>
+          <Link to="/ingresar" className="btn-primario w-full">Iniciar sesión</Link>
         </div>
       ) : (
         <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); m.mutate(); }}>
           <PasswordField label="Nueva contraseña" value={password} onChange={setPassword} autoComplete="new-password" error={fe.password?.[0]} hint="Mínimo 8 caracteres, con letras y números." />
           <PasswordField label="Confirmar contraseña" value={confirm} onChange={setConfirm} autoComplete="new-password" error={fe.confirmPassword?.[0]} />
           {m.error && <Alert kind="error">{(m.error as Error).message}</Alert>}
-          <LoadingButton type="submit" loading={m.isPending} className="btn-cafe w-full">Guardar contraseña</LoadingButton>
+          <LoadingButton type="submit" loading={m.isPending} className="btn-primario w-full">Guardar contraseña</LoadingButton>
         </form>
       )}
     </AuthShell>

@@ -75,12 +75,19 @@ function Header() {
         </Link>
         <div className="flex items-center justify-end gap-1 text-rosa-600">
           {isAdmin && (
-            <Link to="/admin" className="btn-fantasma btn-sm hidden sm:inline-flex">Panel</Link>
+            <Link to="/admin" className="btn-secundario btn-sm hidden sm:inline-flex">Panel admin</Link>
           )}
-          <Link to={user ? "/cuenta" : "/ingresar"} className="flex min-h-10 items-center gap-2 rounded-full px-3 text-sm font-bold hover:bg-rosa-50">
-            <User className="size-5" />
-            <span className="hidden sm:inline">{user ? user.firstName : "Ingresar"}</span>
-          </Link>
+          {user ? (
+            <Link to="/cuenta" className="flex min-h-10 items-center gap-2 rounded-full px-3 text-sm font-bold hover:bg-rosa-50">
+              <User className="size-5" />
+              <span className="hidden sm:inline">{user.firstName}</span>
+            </Link>
+          ) : (
+            <>
+              <Link to="/ingresar" className="btn-primario btn-sm hidden sm:inline-flex"><User className="size-4" /> Iniciar sesión</Link>
+              <Link to="/ingresar" className="grid size-10 place-items-center rounded-full hover:bg-rosa-50 sm:hidden" aria-label="Iniciar sesión"><User className="size-5" /></Link>
+            </>
+          )}
           <Link to="/carrito" className="relative grid size-10 place-items-center rounded-full hover:bg-rosa-50" aria-label={`Carrito, ${count} artículo${count === 1 ? "" : "s"}`}>
             <ShoppingBag className="size-5" />
             {count > 0 && (

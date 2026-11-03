@@ -107,10 +107,7 @@ export default function Home() {
               {/* Marco: borde blanco festoneado + aro dorado */}
               <div className="aspect-[1/0.82] rounded-[50%] bg-white p-3 shadow-[var(--shadow-elevada)]" style={{ boxShadow: "0 0 0 6px #fff, 0 0 0 8px var(--color-empolvado), var(--shadow-elevada)" }}>
                 <div className="relative size-full overflow-hidden rounded-[50%] border-[6px] border-dorado bg-rosa-50">
-                  <img src={asset("/productos/pastel-vintage-azul-cerezas.webp")} alt="Pastel vintage azul con cerezas" className="absolute top-[6%] left-1/2 w-[50%] -translate-x-1/2 drop-shadow-md" />
-                  <img src={asset("/productos/cupcake-de-fresa.webp")} alt="" className="absolute bottom-[8%] left-[7%] w-[29%] drop-shadow-md" />
-                  <img src={asset("/productos/vela-pastelito-fresas.webp")} alt="" className="absolute right-[6%] bottom-[7%] w-[31%] drop-shadow-md" />
-                  <img src={asset("/productos/dona-rosa-chispas.webp")} alt="" className="absolute bottom-[3%] left-1/2 w-[24%] -translate-x-1/2 drop-shadow-md" />
+                  <img src={asset("/productos/pastel-vintage-azul-cerezas.webp")} alt="Pastel vintage azul con olanes blancos y cerezas" className="absolute top-1/2 left-1/2 w-[74%] -translate-x-1/2 -translate-y-[47%] drop-shadow-[0_18px_20px_rgb(122_77_58/0.25)]" />
                 </div>
               </div>
               <Bow className="absolute -bottom-9 left-1/2 w-28 -translate-x-1/2 drop-shadow" />
@@ -123,7 +120,7 @@ export default function Home() {
       {/* Categorías */}
       {visibleCats.length > 0 && (
         <Section eyebrow="Explora" title="Categorías" link={{ to: "/catalogo", label: "Ver todo" }}>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
             {visibleCats.map((c, i) => {
               const Icon = CATEGORY_ICON[c.slug] ?? Sparkles;
               return (

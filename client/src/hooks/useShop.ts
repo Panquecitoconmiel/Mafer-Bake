@@ -1,4 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { api, ApiError } from "../services/api";
 import type { Cart, Selections } from "../types";
@@ -12,13 +14,16 @@ export const errorMessage = (e: unknown) => (e instanceof ApiError ? e.message :
 export function useCartActions() {
   const qc = useQueryClient();
   const notify = useToast();
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const setCart = (cart: Cart) => qc.setQueryData(["cart"], cart);
   const onError = (e: unknown) => {
     notify(errorMessage(e), "error");
     qc.invalidateQueries({ queryKey: ["cart"] });
   };
 
-  const add = useMutation({
+  const addMutation = useMutation({
     mutationFn: (body: { productId: string; variantId?: string | null; quantity: number; selections: Selections }) => api.addToCart(body),
     onSuccess: (cart) => {
       setCart(cart);
@@ -26,6 +31,21 @@ export function useCartActions() {
     },
     onError,
   });
+  type AddBody = Parameters<typeof addMutation.mutate>[0];
+  type AddOptions = Parameters<typeof addMutation.mutate>[1];
+  /** Para comprar hay que iniciar sesión: si no hay sesión, se lleva al inicio de sesión y luego regresa aquí. */
+  const add = {
+    isPending: addMutation.isPending,
+    mutate: (body: AddBody, options?: AddOptions) => {
+      if (loading) return;
+      if (!user) {
+        notify("Inicia sesión o crea tu cuenta para comprar.", "info");
+        navigate(`/ingresar?volver=${encodeURIComponent(location.pathname + location.search)}`);
+        return;
+      }
+      addMutation.mutate(body, options);
+    },
+  };
   const update = useMutation({
     mutationFn: ({ id, quantity }: { id: string; quantity: number }) => api.updateCartItem(id, quantity),
     onSuccess: setCart,
