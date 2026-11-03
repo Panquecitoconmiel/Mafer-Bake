@@ -15,9 +15,17 @@ const schema = z.object({
   STRIPE_CURRENCY: z.string().toLowerCase().default("mxn"),
   MAIL_FROM: z.string().default("Mafer <no-reply@example.com>"),
   STORE_TIMEZONE: z.string().default("America/Mexico_City"),
+  /** Carpeta de imágenes subidas. En Railway apunta a un volumen persistente (p. ej. /data/uploads). */
+  UPLOAD_DIR: z.string().optional(),
+  /** Carpeta con la tienda compilada (client/dist). En producción la API también la sirve. */
+  CLIENT_DIST_DIR: z.string().optional(),
 });
 
-const parsed = schema.safeParse(process.env);
+// En Render, si no se define CLIENT_URL se usa la dirección pública que asigna la plataforma.
+const source = { ...process.env };
+if (!source.CLIENT_URL && source.RENDER_EXTERNAL_URL) source.CLIENT_URL = source.RENDER_EXTERNAL_URL;
+
+const parsed = schema.safeParse(source);
 if (!parsed.success) {
   console.error("Variables de entorno inválidas:", parsed.error.flatten().fieldErrors);
   process.exit(1);

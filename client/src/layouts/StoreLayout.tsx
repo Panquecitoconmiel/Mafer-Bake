@@ -5,6 +5,7 @@ import { Link, NavLink, Outlet, useLocation, useNavigate, useSearchParams } from
 import { Logo } from "../components/Logo";
 import { useAuth } from "../context/AuthContext";
 import { useCart, useStore } from "../hooks/useShop";
+import { DEMO_MODE } from "../services/api";
 
 const NAV = [
   { to: "/", label: "Inicio", end: true },
@@ -182,6 +183,13 @@ function Footer() {
 }
 
 function DemoNotice() {
+  if (DEMO_MODE) {
+    return (
+      <div className="bg-cafe-700 px-4 py-1.5 text-center text-xs font-semibold text-crema-100">
+        Demostración de diseño · No se procesan pedidos ni pagos reales
+      </div>
+    );
+  }
   if (import.meta.env.VITE_DEMO_NOTICE === "false") return null;
   return (
     <div className="bg-cafe-700 px-4 py-1.5 text-center text-xs font-semibold text-crema-100">

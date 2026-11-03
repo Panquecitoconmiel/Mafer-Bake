@@ -3,12 +3,13 @@ import { CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { Logo } from "../components/Logo";
+import { asset } from "../lib/asset";
 import { Alert, Field, LoadingButton, Spinner } from "../components/ui";
 import { useAuth } from "../context/AuthContext";
-import { api, ApiError } from "../services/api";
+import { api, ApiError, DEMO_MODE } from "../services/api";
 
 /** Diseño de autenticación: ilustración + tarjeta (inspirado en la referencia visual de Mafer). */
-function AuthShell({ title, subtitle, children, image = "/demo/pastel-fresas.svg" }: { title: string; subtitle?: string; children: ReactNode; image?: string }) {
+function AuthShell({ title, subtitle, children, image = asset("/demo/pastel-fresas.svg") }: { title: string; subtitle?: string; children: ReactNode; image?: string }) {
   return (
     <div className="contenedor flex justify-center py-8 sm:py-14">
       <div className="grid w-full max-w-4xl overflow-hidden rounded-[2rem] bg-crema-50 shadow-[var(--shadow-elevada)] md:grid-cols-2">
@@ -63,6 +64,13 @@ export function Login() {
 
   return (
     <AuthShell title="Iniciar sesión" subtitle="Qué gusto verte de nuevo.">
+      {DEMO_MODE && (
+        <div className="mb-5 rounded-xl bg-rosa-50 p-4 text-sm">
+          <p className="font-bold text-cafe-900">Demostración</p>
+          <p className="mt-1 text-cafe-500">Para ver el panel administrativo entra con <strong className="text-cafe-700">admin@demo.mafer</strong> y la contraseña <strong className="text-cafe-700">demo1234</strong>. También puedes crear una cuenta de cliente de prueba.</p>
+          <button type="button" className="btn-secundario btn-sm mt-3" onClick={() => { setEmail("admin@demo.mafer"); setPassword("demo1234"); }}>Usar cuenta de demostración</button>
+        </div>
+      )}
       <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); m.mutate(); }}>
         <Field label="Correo electrónico" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
         <PasswordField label="Contraseña" value={password} onChange={setPassword} autoComplete="current-password" />
@@ -100,7 +108,7 @@ export function Register() {
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: e.target.value });
 
   return (
-    <AuthShell title="Crear cuenta" subtitle="Guarda tus direcciones, favoritos y sigue tus pedidos." image="/demo/cupcakes-surtidos.svg">
+    <AuthShell title="Crear cuenta" subtitle="Guarda tus direcciones, favoritos y sigue tus pedidos." image={asset("/demo/cupcakes-surtidos.svg")}>
       <form className="space-y-4" onSubmit={submit} noValidate>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Nombre" autoComplete="given-name" required value={f.firstName} onChange={set("firstName")} error={err("firstName")} />
@@ -128,7 +136,7 @@ export function ForgotPassword() {
   const [email, setEmail] = useState("");
   const m = useMutation({ mutationFn: () => api.forgot(email.trim()) });
   return (
-    <AuthShell title="Recuperar contraseña" subtitle="Te enviaremos un enlace para crear una nueva." image="/demo/galletas-decoradas.svg">
+    <AuthShell title="Recuperar contraseña" subtitle="Te enviaremos un enlace para crear una nueva." image={asset("/demo/galletas-decoradas.svg")}>
       {m.isSuccess ? (
         <Alert kind="exito">{m.data.message}</Alert>
       ) : (
@@ -151,7 +159,7 @@ export function ResetPassword() {
   const m = useMutation({ mutationFn: () => api.reset({ token, password, confirmPassword: confirm }) });
   const fe = m.error instanceof ApiError ? m.error.fieldErrors : {};
   return (
-    <AuthShell title="Nueva contraseña" image="/demo/galletas-decoradas.svg">
+    <AuthShell title="Nueva contraseña" image={asset("/demo/galletas-decoradas.svg")}>
       {!token ? (
         <Alert kind="error">El enlace no es válido. Solicita uno nuevo.</Alert>
       ) : m.isSuccess ? (

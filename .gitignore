@@ -11,3 +11,4 @@ server/uploads/*
 .vscode/
 .idea/
 *.tsbuildinfo
+!client/.env.demo

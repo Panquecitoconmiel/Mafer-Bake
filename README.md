@@ -13,6 +13,10 @@ Tienda web de Mafer: catálogo de cupcakes, pasteles, galletas y postres persona
 | Pruebas | Vitest + Supertest (integración contra MySQL real) |
 | Paquetes | **pnpm** (workspaces) |
 
+## Demostración del diseño (sin base de datos)
+
+Para enseñar la tienda a un cliente existe un **modo vitrina** que funciona sin servidor ni MySQL y se publica gratis en GitHub Pages. Ver [docs/DEMO.md](docs/DEMO.md).
+
 ## Estructura
 
 ```
@@ -133,4 +137,4 @@ Sin `STRIPE_SECRET_KEY` la tienda funciona completa, pero el botón «Confirmar 
 
 Consulta [docs/ESTADO.md](docs/ESTADO.md) para la lista detallada de lo que funciona, lo verificado y lo pendiente.
 
-Documentación adicional: [API](docs/API.md) · [Stripe](docs/STRIPE.md) · [Despliegue](docs/DESPLIEGUE.md)
+Documentación adicional: [Demostración](docs/DEMO.md) · [API](docs/API.md) · [Stripe](docs/STRIPE.md) · [Despliegue](docs/DESPLIEGUE.md)

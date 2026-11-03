@@ -1,0 +1,29 @@
+# Blueprint de Render: tienda + API de Mafer en un solo servicio web gratuito.
+# La base de datos MySQL va aparte (por ejemplo, el plan gratuito de Aiven).
+services:
+  - type: web
+    name: mafer
+    runtime: node
+    plan: free
+    buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm build
+    startCommand: pnpm --filter ./server start:prod
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: STORE_TIMEZONE
+        value: America/Mexico_City
+      - key: STRIPE_CURRENCY
+        value: mxn
+      # Se piden al crear el servicio (no se guardan en el repositorio):
+      - key: DATABASE_URL
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false

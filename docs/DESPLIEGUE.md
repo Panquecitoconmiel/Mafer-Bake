@@ -2,6 +2,13 @@
 
 Mafer son dos piezas: una **API Node.js** con MySQL 8 y un **frontend estático** (archivos de `client/dist`).
 
+## Opción gratuita: Render + Aiven
+
+- **Render** (plan gratuito) ejecuta la API **y** entrega la tienda desde el mismo servicio: en producción el servidor sirve `client/dist`. El archivo `render.yaml` ya trae la configuración (Blueprint).
+- **Aiven** (plan gratuito de MySQL, 1 GB): copia su *Service URI* en `DATABASE_URL`; ya incluye `ssl-mode=REQUIRED` y la conexión se cifra.
+- Límites del plan gratuito de Render: el servicio se duerme tras 15 minutos sin visitas (la siguiente carga tarda ~1 minuto) y el disco no es persistente, así que las imágenes subidas desde el panel se pierden al reiniciar; usa imágenes con URL https mientras tanto.
+- `CLIENT_URL` se toma automáticamente de `RENDER_EXTERNAL_URL`.
+
 ## Opción recomendada: mismo dominio con proxy inverso
 
 Servir frontend y API bajo el mismo dominio evita problemas de cookies entre sitios:

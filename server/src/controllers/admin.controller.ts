@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
+import { env } from "../config/env.js";
 import { prisma } from "../config/prisma.js";
 import * as admin from "../services/admin.service.js";
 import { createRefund } from "../services/payment.service.js";
@@ -100,7 +101,7 @@ export async function removeBlockedDate(req: Request, res: Response) {
 export const listAudit = async (_req: Request, res: Response) => res.json({ items: await admin.listAudit() });
 
 // Subida de imágenes: se valida la firma real del archivo, no solo la extensión.
-export const UPLOAD_DIR = path.resolve(process.cwd(), "uploads");
+export const UPLOAD_DIR = path.resolve(env.UPLOAD_DIR || path.join(process.cwd(), "uploads"));
 const SIGNATURES: { ext: string; test: (b: Buffer) => boolean }[] = [
   { ext: "jpg", test: (b) => b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff },
   { ext: "png", test: (b) => b.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) },

@@ -6,6 +6,7 @@ import { ContactInfo, DeliveryInfo, FAQ } from "../components/StoreInfo";
 import { ErrorState, Spinner } from "../components/ui";
 import { useCategories, useStore } from "../hooks/useShop";
 import { api } from "../services/api";
+import { asset } from "../lib/asset";
 
 const CATEGORY_ICON: Record<string, typeof Cake> = {
   cupcakes: Sparkles,
@@ -67,7 +68,7 @@ export default function Home() {
             </div>
           </div>
           <div className="relative">
-            <img src="/demo/hero.svg" alt="Pastel de dos pisos con flores, cupcake y galletas de Mafer" className="aspect-[9/7.6] w-full rounded-[2rem] object-cover shadow-[var(--shadow-elevada)]" />
+            <img src={asset("/demo/hero.svg")} alt="Pastel de dos pisos con flores, cupcake y galletas de Mafer" className="aspect-[9/7.6] w-full rounded-[2rem] object-cover shadow-[var(--shadow-elevada)]" />
             <div className="absolute -bottom-4 left-4 rounded-2xl bg-white px-4 py-3 shadow-[var(--shadow-elevada)] sm:left-[-1.5rem]">
               <p className="font-display text-lg text-cafe-900 italic">«{store?.slogan ?? "Pequeños antojos, grandes momentos"}»</p>
             </div>
@@ -111,7 +112,7 @@ export default function Home() {
               </p>
               <Link to="/categoria/pasteles-personalizados" className="btn mt-7 bg-rosa-200 px-7 text-cafe-900 hover:bg-white">Diseñar mi pastel</Link>
             </div>
-            <img src="/demo/pastel-personalizado.svg" alt="" className="mx-auto w-full max-w-xs rounded-3xl" />
+            <img src={asset("/demo/pastel-personalizado.svg")} alt="" className="mx-auto w-full max-w-xs rounded-3xl" />
           </div>
         </div>
       </section>

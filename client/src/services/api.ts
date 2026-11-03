@@ -14,7 +14,14 @@ export class ApiError extends Error {
   }
 }
 
+/** Modo vitrina: sin servidor ni base de datos (ver services/demo/mock.ts). */
+export const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "true";
+
 export async function http<T>(path: string, init: RequestInit & { json?: unknown } = {}): Promise<T> {
+  if (DEMO_MODE) {
+    const { demoHttp } = await import("./demo/mock");
+    return demoHttp<T>(path, init);
+  }
   const { json, headers, ...rest } = init;
   let res: Response;
   try {

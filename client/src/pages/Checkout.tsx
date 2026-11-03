@@ -7,7 +7,7 @@ import { Alert, ErrorState, LoadingButton, ProductImage, Spinner } from "../comp
 import { useToast } from "../context/ToastContext";
 import { useCart, useStore } from "../hooks/useShop";
 import { money, todayISO } from "../lib/format";
-import { api, ApiError } from "../services/api";
+import { api, ApiError, DEMO_MODE } from "../services/api";
 
 type Method = "PICKUP" | "DELIVERY";
 
@@ -67,13 +67,15 @@ export default function Checkout() {
   }, [date]);
 
   if (cartLoading || !store) return <Spinner className="py-24" />;
-  if (!cart || cart.items.length === 0) return <Navigate to="/carrito" replace />;
+  // Mientras se crea el pedido el carrito se vacía: no redirigir al carrito en ese momento.
+  if ((!cart || cart.items.length === 0) && !submitting) return <Navigate to="/carrito" replace />;
+  if (!cart) return <Spinner className="py-24" />;
   if (cart.hasIssues) return <Navigate to="/carrito" replace />;
 
   const minDate = todayISO(0);
   const maxDate = todayISO(store.maxAdvanceDays);
   const canDeliver = store.deliveryEnabled;
-  const ready = !!date && !!slotId && terms && (method === "PICKUP" || !!addressId) && !!quote && !quoting && store.paymentsEnabled;
+  const ready = !!date && !!slotId && terms && (method === "PICKUP" || !!addressId) && !!quote && !quoting && (store.paymentsEnabled || DEMO_MODE);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -98,8 +100,8 @@ export default function Checkout() {
         const { url } = await api.checkout(order.id);
         window.location.assign(url);
       } catch (err) {
-        notify(err instanceof ApiError ? err.message : "No pudimos iniciar el pago.", "error");
-        navigate(`/cuenta/pedidos/${order.id}`);
+        notify(err instanceof ApiError ? err.message : "No pudimos iniciar el pago.", DEMO_MODE ? "info" : "error");
+        navigate(`/cuenta/pedidos/${order.id}`, { replace: true });
       }
     } catch (err) {
       if (err instanceof ApiError) {
@@ -119,7 +121,9 @@ export default function Checkout() {
     <div className="contenedor pt-10">
       <h1 className="mb-2 text-4xl">Finalizar compra</h1>
       <p className="mb-8 text-cafe-500">Revisa los detalles de tu pedido antes de pagar.</p>
-      {!store.paymentsEnabled && (
+      {DEMO_MODE ? (
+        <div className="mb-6"><Alert kind="info">Demostración: puedes completar el proceso y se creará un pedido de prueba en «Mis pedidos». No se realiza ningún cobro.</Alert></div>
+      ) : !store.paymentsEnabled && (
         <div className="mb-6"><Alert kind="aviso">El pago en línea aún no está habilitado en la tienda. Puedes revisar tu pedido, pero todavía no es posible pagarlo.</Alert></div>
       )}
 
@@ -259,7 +263,7 @@ export default function Checkout() {
             </LoadingButton>
             {!ready && !submitting && (
               <p className="mt-2 text-center text-xs text-cafe-400">
-                {!store.paymentsEnabled ? "Pago en línea no disponible por el momento." : !date || !slotId ? "Elige fecha y horario." : !terms ? "Acepta las condiciones para continuar." : method === "DELIVERY" && !addressId ? "Agrega una dirección de entrega." : ""}
+                {!store.paymentsEnabled && !DEMO_MODE ? "Pago en línea no disponible por el momento." : !date || !slotId ? "Elige fecha y horario." : !terms ? "Acepta las condiciones para continuar." : method === "DELIVERY" && !addressId ? "Agrega una dirección de entrega." : ""}
               </p>
             )}
             <p className="mt-4 text-center text-xs text-cafe-400">Serás redirigido a Stripe para pagar de forma segura.</p>
