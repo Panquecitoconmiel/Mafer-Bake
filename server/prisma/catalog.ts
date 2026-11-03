@@ -25,14 +25,14 @@ export type CatalogProduct = {
 };
 
 export const categories = [
-  { slug: "pasteles", name: "Pasteles", description: "Clásicos de la casa para compartir.", sortOrder: 1 },
-  { slug: "pasteles-personalizados", name: "Pasteles personalizados", description: "Diseñados contigo para tu celebración.", sortOrder: 2 },
-  { slug: "cupcakes", name: "Cupcakes", description: "Pequeños, esponjosos y decorados a mano.", sortOrder: 3 },
-  { slug: "donas", name: "Donas", description: "Esponjosas, glaseadas y recién hechas.", sortOrder: 4 },
-  { slug: "galletas", name: "Galletas", description: "Horneadas en pequeños lotes cada día.", sortOrder: 5 },
-  { slug: "pan-dulce", name: "Pan dulce", description: "Para el café, la merienda o cualquier antojo.", sortOrder: 6 },
-  { slug: "postres-especiales", name: "Postres especiales", description: "Rebanadas y postres individuales.", sortOrder: 7 },
-  { slug: "velas", name: "Velas de postre", description: "Velas aromáticas hechas a mano con forma de postre. No son comestibles.", sortOrder: 8 },
+  { slug: "pasteles", name: "Pasteles", description: "Clásicos de la casa para compartir.", sortOrder: 1 , imageUrl: "/productos/pastel-feliz-cumpleanos.webp" },
+  { slug: "pasteles-personalizados", name: "Pasteles personalizados", description: "Diseñados contigo para tu celebración.", sortOrder: 2 , imageUrl: "/productos/pastel-corazon-moras-azules.webp" },
+  { slug: "cupcakes", name: "Cupcakes", description: "Pequeños, esponjosos y decorados a mano.", sortOrder: 3 , imageUrl: "/productos/cupcake-de-fiesta.webp" },
+  { slug: "donas", name: "Donas", description: "Esponjosas, glaseadas y recién hechas.", sortOrder: 4 , imageUrl: "/productos/dona-rosa-chispas.webp" },
+  { slug: "galletas", name: "Galletas", description: "Horneadas en pequeños lotes cada día.", sortOrder: 5 , imageUrl: "/productos/galleta-centro-fundido.webp" },
+  { slug: "pan-dulce", name: "Pan dulce", description: "Para el café, la merienda o cualquier antojo.", sortOrder: 6 , imageUrl: "/productos/rol-de-canela.webp" },
+  { slug: "postres-especiales", name: "Postres especiales", description: "Rebanadas y postres individuales.", sortOrder: 7 , imageUrl: "/productos/cheesecake-mora-azul.webp" },
+  { slug: "velas", name: "Velas de postre", description: "Velas aromáticas hechas a mano con forma de postre. No son comestibles.", sortOrder: 8 , imageUrl: "/productos/vela-pastelito-fresas.webp" },
 ];
 
 /** Categorías de la demostración anterior que ya no se usan: se ocultan. */

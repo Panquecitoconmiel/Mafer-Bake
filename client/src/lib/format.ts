@@ -32,7 +32,7 @@ export const ORDER_STATUS: Record<OrderStatus, string> = {
 };
 
 export const PAYMENT_STATUS: Record<PaymentStatus, string> = {
-  PENDING: "Pendiente",
+  PENDING: "Pago pendiente",
   PAID: "Pagado",
   FAILED: "Rechazado",
   CANCELLED: "Cancelado",

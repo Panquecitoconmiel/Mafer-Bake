@@ -98,7 +98,7 @@ function Header() {
       </div>
       <nav className="contenedor hidden h-11 items-center justify-center gap-1 lg:flex" aria-label="Principal">
         {NAV.map((n) => (
-          <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => `rounded-full px-3.5 py-1.5 font-display text-[13px] font-semibold tracking-[0.08em] uppercase transition ${isActive ? "bg-rosa-100 text-rosa-700" : "text-rosa-600/85 hover:text-rosa-700"}`}>
+          <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => `rounded-full px-3.5 py-1.5 text-[15px] font-semibold transition ${isActive ? "bg-rosa-100 text-rosa-700" : "text-cafe-700 hover:text-rosa-600"}`}>
             {n.label}
           </NavLink>
         ))}
@@ -144,7 +144,7 @@ function Footer() {
     s?.whatsapp && { href: `https://wa.me/${s.whatsapp.replace(/\D/g, "")}`, label: "WhatsApp", Icon: MessageCircle },
   ].filter(Boolean) as { href: string; label: string; Icon: typeof Instagram }[];
 
-  const col = "mb-3 font-display text-sm font-semibold tracking-[0.12em] text-rosa-600 uppercase";
+  const col = "mb-3 font-display text-base font-semibold text-cafe-900";
   const link = "hover:text-rosa-600";
   return (
     <footer className="mt-20">
@@ -152,7 +152,7 @@ function Footer() {
       <div className="bg-rosa-100 text-cafe-700">
         <div className="contenedor grid gap-10 py-14 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div className="flex flex-col items-start">
-            <Logo tagline />
+            <Logo tagline align="start" />
             <p className="mt-4 max-w-xs font-display text-lg text-cafe-700">«{s?.slogan ?? "Pequeños antojos, grandes momentos"}»</p>
             {social.length > 0 && (
               <div className="mt-5 flex gap-2">
@@ -201,15 +201,15 @@ function Footer() {
 function DemoNotice() {
   if (DEMO_MODE) {
     return (
-      <div className="bg-coral px-4 py-2 text-center text-xs font-bold tracking-wide text-white">
-        Demostración de diseño · Imágenes ilustrativas · No se procesan pedidos ni pagos reales
+      <div className="bg-coral px-4 py-2 text-center text-[13px] font-semibold text-white">
+        Sitio de demostración: las imágenes son ilustrativas y no se procesan pedidos ni pagos reales.
       </div>
     );
   }
   if (import.meta.env.VITE_DEMO_NOTICE === "false") return null;
   return (
-    <div className="bg-coral px-4 py-2 text-center text-xs font-bold tracking-wide text-white">
-      Sitio en desarrollo · Productos, precios e imágenes de demostración
+    <div className="bg-coral px-4 py-2 text-center text-[13px] font-semibold text-white">
+      Sitio en desarrollo: productos, precios e imágenes de demostración.
     </div>
   );
 }

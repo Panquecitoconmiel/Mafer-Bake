@@ -91,7 +91,7 @@ function OrderList({ orders }: { orders: NonNullable<ReturnType<typeof useOrders
               <p className="font-bold">{o.number}</p>
               <p className="text-xs text-cafe-500">{shortDate(o.createdAt)} · Para el {longDate(o.requestedDate)}</p>
             </div>
-            <div className="flex flex-wrap gap-1.5"><OrderStatusBadge status={o.status} /><PaymentStatusBadge status={o.paymentStatus} /></div>
+            <div className="flex flex-wrap gap-1.5"><OrderStatusBadge status={o.status} />{o.status !== "PENDING_PAYMENT" && <PaymentStatusBadge status={o.paymentStatus} />}</div>
             <p className="font-bold">{money(o.totalCents)}</p>
           </Link>
         </li>
@@ -155,7 +155,7 @@ export function AccountOrderDetail() {
           <h2 className="text-3xl">Pedido {o.number}</h2>
           <p className="text-sm text-cafe-500">Realizado el {shortDateTime(o.createdAt)}</p>
         </div>
-        <div className="flex gap-1.5"><OrderStatusBadge status={o.status} /><PaymentStatusBadge status={o.paymentStatus} /></div>
+        <div className="flex gap-1.5"><OrderStatusBadge status={o.status} />{o.status !== "PENDING_PAYMENT" && <PaymentStatusBadge status={o.paymentStatus} />}</div>
       </div>
 
       {o.status === "PENDING_PAYMENT" && (

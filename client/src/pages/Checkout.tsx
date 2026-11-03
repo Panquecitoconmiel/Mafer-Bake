@@ -208,7 +208,7 @@ export default function Checkout() {
               <div>
                 <label htmlFor="cupon" className="etiqueta">Cupón de descuento</label>
                 <div className="flex gap-2">
-                  <input id="cupon" className="campo uppercase" value={couponInput} onChange={(e) => setCouponInput(e.target.value)} placeholder="Escribe tu código" />
+                  <input id="cupon" className="campo uppercase placeholder:normal-case" value={couponInput} onChange={(e) => setCouponInput(e.target.value)} placeholder="Escribe tu código" />
                   {coupon ? (
                     <button type="button" className="btn-secundario" onClick={() => { setCoupon(null); setCouponInput(""); }}>Quitar</button>
                   ) : (

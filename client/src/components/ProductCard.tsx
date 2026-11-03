@@ -1,54 +1,60 @@
-import { Clock, ShoppingBag } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCartActions } from "../hooks/useShop";
+import { money } from "../lib/format";
 import type { Product } from "../types";
-import { Price, ProductImage } from "./ui";
+import { ProductImage } from "./ui";
 
-/** Tarjeta de producto. Si no requiere elegir opciones, permite agregar directo al carrito. */
 /** Fondos pastel que se alternan detrás de las fotos recortadas. */
 export const TONOS = ["bg-rosa-100", "bg-celeste", "bg-vainilla", "bg-durazno-100"];
 
+/** Tarjeta de producto. Si no requiere elegir opciones, permite agregar directo al carrito. */
 export function ProductCard({ product, tone = 0 }: { product: Product; tone?: number }) {
   const { add } = useCartActions();
   const needsChoice = product.variants.length > 0 || product.options.some((o) => o.isRequired);
   const url = `/producto/${product.slug}`;
+  const onSale = product.salePriceCents != null;
 
   return (
-    <article className="group tarjeta flex flex-col overflow-hidden transition hover:-translate-y-1 hover:shadow-[var(--shadow-elevada)]">
-      <Link to={url} className={`relative block aspect-square overflow-hidden ${TONOS[tone % TONOS.length]}`}>
-        <ProductImage src={product.images[0]?.url} alt={product.images[0]?.alt ?? product.name} className="size-full object-contain p-5 drop-shadow-[0_10px_12px_rgb(122_77_58/0.18)] transition duration-500 group-hover:scale-[1.06] group-hover:-rotate-2" fit="contain" />
-        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-          {product.salePriceCents && <span className="rounded-full bg-rosa-600 px-2.5 py-1 text-[11px] font-bold text-white">Promoción</span>}
-          {!product.inStock && <span className="rounded-full bg-cafe-700 px-2.5 py-1 text-[11px] font-bold text-crema-50">Agotado</span>}
-          {product.inStock && product.lowStock && <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-aviso">Últimas piezas</span>}
-        </div>
-      </Link>
-      <div className="flex flex-1 flex-col gap-1.5 p-3 sm:p-4">
-        <p className="text-[11px] font-extrabold tracking-[0.14em] text-rosa-600/80 uppercase">{product.category.name}</p>
-        <h3 className="text-[15px] leading-snug font-medium sm:text-[17px]">
-          <Link to={url} className="hover:text-rosa-600">{product.name}</Link>
-        </h3>
-        <p className="line-clamp-2 hidden text-sm text-cafe-500 sm:block">{product.shortDescription}</p>
-        {product.prepTimeHours >= 24 && (
-          <p className="flex items-center gap-1 text-xs text-cafe-500">
-            <Clock className="size-3.5" /> {Math.ceil(product.prepTimeHours / 24)} día(s) de anticipación
-          </p>
+    <article className="group flex flex-col">
+      <Link to={url} className={`relative block aspect-square overflow-hidden rounded-[1.4rem] ${TONOS[tone % TONOS.length]}`} tabIndex={-1} aria-hidden="true">
+        <ProductImage
+          src={product.images[0]?.url}
+          alt=""
+          className="size-full p-[9%] drop-shadow-[0_12px_14px_rgb(122_77_58/0.16)] transition duration-500 ease-out group-hover:scale-[1.04]"
+        />
+        {(onSale || !product.inStock || product.lowStock) && (
+          <span
+            className={`absolute top-3 left-3 rounded-full px-2.5 py-1 text-xs font-bold ${
+              !product.inStock ? "bg-cafe-700 text-white" : onSale ? "bg-rosa-600 text-white" : "bg-white/95 text-aviso"
+            }`}
+          >
+            {!product.inStock ? "Agotado" : onSale ? "Promoción" : "Últimas piezas"}
+          </span>
         )}
-        <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-3">
-          <div className="text-[15px]">
-            {product.variants.length > 0 && <span className="mr-1 text-xs text-cafe-500">Desde</span>}
-            <Price cents={product.effectivePriceCents} originalCents={product.salePriceCents ? product.priceCents : null} />
-          </div>
+      </Link>
+      <div className="flex flex-1 flex-col px-1 pt-3">
+        <h3 className="font-display text-[16px] leading-snug font-semibold sm:text-[17px]">
+          <Link to={url} className="hover:text-rosa-600 focus-visible:text-rosa-600">{product.name}</Link>
+        </h3>
+        <p className="mt-0.5 line-clamp-1 text-sm text-cafe-500">{product.shortDescription}</p>
+        <div className="mt-auto flex items-center justify-between gap-2 pt-3">
+          <p className="flex flex-wrap items-baseline gap-x-1.5 text-cafe-900">
+            {product.variants.length > 0 && <span className="text-xs text-cafe-500">Desde</span>}
+            <span className="font-bold">{money(product.effectivePriceCents)}</span>
+            {onSale && <s className="text-xs text-cafe-400">{money(product.priceCents)}</s>}
+          </p>
           {needsChoice ? (
-            <Link to={url} className="btn-secundario btn-sm">{product.options.length ? "Personalizar" : "Elegir"}</Link>
+            <Link to={url} className="btn-secundario btn-sm shrink-0" aria-label={`Elegir opciones de ${product.name}`}>Elegir</Link>
           ) : (
             <button
-              className="btn-primario btn-sm"
+              className="grid size-9 shrink-0 place-items-center rounded-full bg-rosa-600 text-white transition hover:bg-rosa-700 disabled:opacity-50"
               disabled={!product.inStock || add.isPending}
               onClick={() => add.mutate({ productId: product.id, quantity: 1, selections: {} })}
               aria-label={`Agregar ${product.name} al carrito`}
+              title="Agregar al carrito"
             >
-              <ShoppingBag className="size-4" /> Agregar
+              <Plus className="size-4" />
             </button>
           )}
         </div>
@@ -59,7 +65,7 @@ export function ProductCard({ product, tone = 0 }: { product: Product; tone?: nu
 
 export function ProductGrid({ products }: { products: Product[] }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-4">
       {products.map((p, i) => (
         <ProductCard key={p.id} product={p} tone={i} />
       ))}

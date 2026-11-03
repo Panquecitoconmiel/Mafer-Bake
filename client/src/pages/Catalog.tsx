@@ -61,7 +61,7 @@ export default function Catalog({ promotions = false }: { promotions?: boolean }
   const filters = (
     <div className="space-y-6">
       <div>
-        <h2 className="mb-3 font-sans text-xs font-bold tracking-[0.16em] text-cafe-500 uppercase">Categorías</h2>
+        <h2 className="mb-3 font-display text-base font-semibold text-cafe-900">Categorías</h2>
         <ul className="space-y-1">
           <li>
             <Link to={`/catalogo${query.q ? `?q=${encodeURIComponent(query.q)}` : ""}`} aria-current={!slug && !promotions ? "page" : undefined} className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-crema-200 aria-[current=page]:bg-rosa-100 aria-[current=page]:text-rosa-700">
@@ -78,7 +78,7 @@ export default function Catalog({ promotions = false }: { promotions?: boolean }
         </ul>
       </div>
       <form onSubmit={applyPrice}>
-        <h2 className="mb-3 font-sans text-xs font-bold tracking-[0.16em] text-cafe-500 uppercase">Precio (MXN)</h2>
+        <h2 className="mb-3 font-display text-base font-semibold text-cafe-900">Precio (MXN)</h2>
         <div className="flex items-center gap-2">
           <label className="sr-only" htmlFor="pmin">Precio mínimo</label>
           <input id="pmin" inputMode="numeric" className="campo" placeholder="Mín." value={min} onChange={(e) => setMin(e.target.value)} />

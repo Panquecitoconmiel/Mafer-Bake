@@ -28,7 +28,7 @@ export function AdminLayout() {
   const nav = (
     <nav className="flex flex-col gap-1" aria-label="Administración">
       {NAV.map(({ to, label, Icon, end }) => (
-        <NavLink key={to} to={to} end={end} className={({ isActive }) => `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${isActive ? "bg-rosa-600 text-white" : "text-crema-200 hover:bg-white/10"}`}>
+        <NavLink key={to} to={to} end={end} className={({ isActive }) => `flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-semibold transition ${isActive ? "bg-rosa-100 text-rosa-700" : "text-cafe-700 hover:bg-rosa-50"}`}>
           <Icon className="size-4" /> {label}
         </NavLink>
       ))}
@@ -37,23 +37,23 @@ export function AdminLayout() {
 
   return (
     <div className="min-h-dvh bg-crema-100 lg:grid lg:grid-cols-[250px_1fr]">
-      <aside className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col gap-6 bg-cafe-900 p-5 transition-transform lg:sticky lg:top-0 lg:h-dvh lg:w-auto lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col gap-6 border-r border-rosa-100 bg-white p-5 transition-transform lg:sticky lg:top-0 lg:h-dvh lg:w-auto lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex items-center justify-between">
-          <Link to="/admin"><Logo tone="claro" /></Link>
-          <button className="grid size-9 place-items-center rounded-full text-crema-100 hover:bg-white/10 lg:hidden" onClick={() => setOpen(false)} aria-label="Cerrar menú"><X className="size-5" /></button>
+          <Link to="/admin" className="flex flex-col items-start"><Logo /><span className="mt-1 text-[13px] font-semibold text-cafe-500">Panel de administración</span></Link>
+          <button className="grid size-9 place-items-center rounded-full text-cafe-700 hover:bg-rosa-50 lg:hidden" onClick={() => setOpen(false)} aria-label="Cerrar menú"><X className="size-5" /></button>
         </div>
         <div className="flex-1 overflow-y-auto">{nav}</div>
-        <div className="space-y-1 border-t border-white/10 pt-4 text-sm">
-          <p className="px-3 text-xs text-cafe-400">{user?.firstName} {user?.lastName}</p>
-          <Link to="/" className="flex items-center gap-3 rounded-xl px-3 py-2 font-semibold text-crema-200 hover:bg-white/10"><Store className="size-4" /> Ver tienda</Link>
-          <button onClick={async () => { await logout(); navigate("/"); }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 font-semibold text-crema-200 hover:bg-white/10"><LogOut className="size-4" /> Cerrar sesión</button>
+        <div className="space-y-1 border-t border-rosa-100 pt-4 text-sm">
+          <p className="px-3 pb-1 text-[13px] font-semibold text-cafe-500">{user?.firstName} {user?.lastName}</p>
+          <Link to="/" className="flex items-center gap-3 rounded-xl px-3 py-2 font-semibold text-cafe-700 hover:bg-rosa-50"><Store className="size-4" /> Ver tienda</Link>
+          <button onClick={async () => { await logout(); navigate("/"); }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 font-semibold text-cafe-700 hover:bg-rosa-50"><LogOut className="size-4" /> Cerrar sesión</button>
         </div>
       </aside>
       {open && <div className="fixed inset-0 z-40 bg-cafe-900/40 lg:hidden" onClick={() => setOpen(false)} />}
       <div className="min-w-0">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-crema-200 bg-crema-100/90 px-4 backdrop-blur lg:hidden">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-rosa-100 bg-white/95 px-4 backdrop-blur lg:hidden">
           <button className="grid size-10 place-items-center rounded-full hover:bg-crema-200" onClick={() => setOpen(true)} aria-label="Abrir menú"><Menu className="size-5" /></button>
-          <span className="font-display text-lg italic">Mafer · Admin</span>
+          <span className="font-display text-lg font-semibold text-rosa-600">Mafer <span className="text-sm font-medium text-cafe-500">Panel</span></span>
         </header>
         <main className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-8"><Outlet /></main>
       </div>
@@ -77,10 +77,10 @@ export function Table({ head, children, empty }: { head: string[]; children: Rea
   return (
     <div className="tarjeta overflow-x-auto">
       <table className="w-full min-w-[640px] text-left text-sm">
-        <thead className="border-b border-crema-200 text-xs tracking-wide text-cafe-500 uppercase">
+        <thead className="border-b border-rosa-100 bg-rosa-50/60 text-[13px] text-cafe-500">
           <tr>{head.map((h) => <th key={h} scope="col" className="px-4 py-3 font-bold">{h}</th>)}</tr>
         </thead>
-        <tbody className="divide-y divide-crema-100">{children}</tbody>
+        <tbody className="divide-y divide-rosa-50">{children}</tbody>
       </table>
       {empty && <p className="p-8 text-center text-sm text-cafe-500">No hay registros.</p>}
     </div>

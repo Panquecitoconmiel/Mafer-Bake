@@ -21,7 +21,7 @@ interface Dashboard {
 function Stat({ label, value, hint, to }: { label: string; value: string | number; hint?: string; to?: string }) {
   const body = (
     <>
-      <p className="text-xs font-bold tracking-wide text-cafe-500 uppercase">{label}</p>
+      <p className="text-sm font-semibold text-cafe-500">{label}</p>
       <p className="mt-2 font-display text-3xl text-cafe-900">{value}</p>
       {hint && <p className="mt-1 text-xs text-cafe-400">{hint}</p>}
     </>

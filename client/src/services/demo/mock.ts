@@ -236,7 +236,7 @@ export async function demoHttp<T>(path: string, init: RequestInit & { json?: unk
 
   // Tienda
   if (method === "GET" && p === "/store") return { settings: data.store } as T;
-  if (method === "GET" && p === "/categories") return { items: data.categories } as T;
+  if (method === "GET" && p === "/categories") return { items: data.categories.map((c) => ({ ...c, imageUrl: asset(c.imageUrl) })) } as T;
   if (method === "GET" && p === "/products") return listProducts(q) as T;
   if (method === "GET" && (r = m(/^\/products\/([^/]+)$/))) {
     const prod = bySlug.get(decodeURIComponent(r[1]));

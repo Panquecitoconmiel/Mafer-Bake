@@ -99,12 +99,12 @@
   .chip {
     @apply inline-flex min-h-9 items-center gap-1.5 rounded-full border border-crema-300 bg-white px-3.5 text-sm font-semibold text-cafe-700 transition hover:border-empolvado;
   }
-  .chip[aria-pressed="true"], .chip[aria-current="page"] { @apply border-cafe-700 bg-cafe-700 text-crema-50; }
+  .chip[aria-pressed="true"], .chip[aria-current="page"] { @apply border-rosa-600 bg-rosa-600 text-white; }
 
   .titulo-seccion { @apply font-display text-2xl text-cafe-900 sm:text-3xl; }
   /* Títulos de sección estilo «✶˚ NOVEDADES ˚✶» */
-  .titulo-dulce { @apply font-display text-2xl font-semibold tracking-wide text-menta uppercase sm:text-[1.7rem]; }
+  .titulo-dulce { @apply font-display text-[1.75rem] leading-tight font-semibold text-cafe-900 sm:text-[2rem]; }
   /* Fondo de rayas azul y vainilla */
   .rayas { background: repeating-linear-gradient(90deg, var(--color-celeste) 0 44px, var(--color-vainilla) 44px 88px); }
-  .sobretitulo { @apply text-xs font-bold tracking-[0.18em] text-rosa-600 uppercase; }
+  .sobretitulo { @apply text-sm font-semibold text-rosa-600; }
 }

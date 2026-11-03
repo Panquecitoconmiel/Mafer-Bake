@@ -40,7 +40,7 @@ async function main() {
   for (const c of categories) {
     const cat = await prisma.category.upsert({
       where: { slug: c.slug },
-      update: { name: c.name, description: c.description, sortOrder: c.sortOrder, isActive: true },
+      update: { name: c.name, description: c.description, imageUrl: c.imageUrl, sortOrder: c.sortOrder, isActive: true },
       create: c,
     });
     catIds.set(c.slug, cat.id);
