@@ -15,7 +15,7 @@ Tienda web de Mafer: catálogo de cupcakes, pasteles, galletas y postres persona
 
 ## Demostración del diseño (sin base de datos)
 
-Para enseñar la tienda a un cliente existe un **modo vitrina** que funciona sin servidor ni MySQL y se publica gratis en GitHub Pages. Ver [docs/DEMO.md](docs/DEMO.md).
+Para enseñar la tienda a un cliente existe un **modo vitrina** que funciona sin servidor ni MySQL y se publica gratis en Cloudflare Pages. Ver [docs/DEMO.md](docs/DEMO.md).
 
 ## Estructura
 

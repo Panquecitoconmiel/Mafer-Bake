@@ -9,8 +9,9 @@
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "test": "vitest run",
-    "build:demo": "tsc -b && vite build --mode demo && node scripts/spa-fallback.mjs",
-    "preview:demo": "vite preview --mode demo"
+    "build:demo": "tsc -b && vite build --mode demo",
+    "preview:demo": "vite preview --mode demo",
+    "build:demo:github": "tsc -b && vite build --mode demo && node scripts/spa-fallback.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.104.5",

@@ -17,7 +17,7 @@
     "admin:create": "tsx --env-file-if-exists=.env src/scripts/create-admin.ts",
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
-    "postinstall": "prisma generate",
+    "postinstall": "node -e \"process.exit(process.env.CF_PAGES ? 0 : 1)\" || prisma generate",
     "start:prod": "prisma migrate deploy && node dist/index.js"
   },
   "dependencies": {
