@@ -10,10 +10,12 @@ import { DEMO_MODE } from "../services/api";
 const NAV = [
   { to: "/", label: "Inicio", end: true },
   { to: "/catalogo", label: "Catálogo", end: true },
-  { to: "/categoria/cupcakes", label: "Cupcakes" },
   { to: "/categoria/pasteles", label: "Pasteles" },
+  { to: "/categoria/cupcakes", label: "Cupcakes" },
+  { to: "/categoria/donas", label: "Donas" },
   { to: "/categoria/galletas", label: "Galletas" },
-  { to: "/categoria/pasteles-personalizados", label: "Personalizados" },
+  { to: "/categoria/pan-dulce", label: "Pan dulce" },
+  { to: "/categoria/velas", label: "Velas" },
   { to: "/promociones", label: "Promociones" },
 ];
 
@@ -186,14 +188,14 @@ function DemoNotice() {
   if (DEMO_MODE) {
     return (
       <div className="bg-cafe-700 px-4 py-1.5 text-center text-xs font-semibold text-crema-100">
-        Demostración de diseño · No se procesan pedidos ni pagos reales
+        Demostración de diseño · Imágenes ilustrativas · No se procesan pedidos ni pagos reales
       </div>
     );
   }
   if (import.meta.env.VITE_DEMO_NOTICE === "false") return null;
   return (
     <div className="bg-cafe-700 px-4 py-1.5 text-center text-xs font-semibold text-crema-100">
-      Sitio en desarrollo · Productos y precios de demostración
+      Sitio en desarrollo · Productos, precios e imágenes de demostración
     </div>
   );
 }

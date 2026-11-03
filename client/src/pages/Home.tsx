@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Cake, Cookie, Gift, PartyPopper, Sparkles, Star } from "lucide-react";
+import { ArrowRight, Cake, CakeSlice, Cookie, Croissant, Donut, Flame, Gift, PartyPopper, Sparkles, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ProductGrid } from "../components/ProductCard";
 import { ContactInfo, DeliveryInfo, FAQ } from "../components/StoreInfo";
@@ -13,6 +13,10 @@ const CATEGORY_ICON: Record<string, typeof Cake> = {
   pasteles: Cake,
   galletas: Cookie,
   "pasteles-personalizados": Star,
+  donas: Donut,
+  "pan-dulce": Croissant,
+  "postres-especiales": CakeSlice,
+  velas: Flame,
   "cajas-de-regalo": Gift,
   "paquetes-para-eventos": PartyPopper,
 };
@@ -68,7 +72,7 @@ export default function Home() {
             </div>
           </div>
           <div className="relative">
-            <img src={asset("/demo/hero.svg")} alt="Pastel de dos pisos con flores, cupcake y galletas de Mafer" className="aspect-[9/7.6] w-full rounded-[2rem] object-cover shadow-[var(--shadow-elevada)]" />
+            <img src={asset("/productos/pastel-vintage-azul-cerezas.webp")} alt="Pastel vintage azul con olanes blancos y cerezas" className="aspect-[9/7.6] w-full rounded-[2rem] object-cover shadow-[var(--shadow-elevada)]" />
             <div className="absolute -bottom-4 left-4 rounded-2xl bg-white px-4 py-3 shadow-[var(--shadow-elevada)] sm:left-[-1.5rem]">
               <p className="font-display text-lg text-cafe-900 italic">«{store?.slogan ?? "Pequeños antojos, grandes momentos"}»</p>
             </div>
@@ -112,12 +116,13 @@ export default function Home() {
               </p>
               <Link to="/categoria/pasteles-personalizados" className="btn mt-7 bg-rosa-200 px-7 text-cafe-900 hover:bg-white">Diseñar mi pastel</Link>
             </div>
-            <img src={asset("/demo/pastel-personalizado.svg")} alt="" className="mx-auto w-full max-w-xs rounded-3xl" />
+            <img src={asset("/productos/pastel-corazon-moras-azules.webp")} alt="" className="mx-auto w-full max-w-xs rounded-3xl" />
           </div>
         </div>
       </section>
 
       <ProductSection query={{ onSale: "true", pageSize: 4 }} eyebrow="Por tiempo limitado" title="Promociones" link={{ to: "/promociones", label: "Ver promociones" }} hideIfEmpty />
+      <ProductSection query={{ category: "velas", pageSize: 4, sort: "popular" }} eyebrow="Para regalar o decorar" title="Velas que parecen postre" link={{ to: "/categoria/velas", label: "Ver todas las velas" }} hideIfEmpty />
       <ProductSection query={{ sort: "newest", pageSize: 4 }} eyebrow="Recién salidos del horno" title="Novedades" />
 
       {store && (

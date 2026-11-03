@@ -33,9 +33,15 @@ pnpm --filter ./client preview:demo
 
 Abre http://localhost:4173/Mafer-Bake/
 
+## Catálogo actual
+
+50 productos de ejemplo en 8 categorías: pasteles, pasteles personalizados, cupcakes, donas, galletas, pan dulce, postres especiales y **velas de postre**. Nombres, precios (MXN) y existencias son de ejemplo.
+
+Las fotos están en `client/public/productos/` (WEBP de 800 × 800). Son **imágenes ilustrativas de referencia**: el sitio lo indica en el aviso superior. Antes de vender, reemplázalas por fotos propias de Mafer con el mismo nombre de archivo, o súbelas desde el panel.
+
 ## Cambiar los productos de la demostración
 
-Los datos están en `client/src/services/demo/data.json`. La lógica que imita al servidor está en `client/src/services/demo/mock.ts`. La versión normal de la tienda (`pnpm build`) **no** incluye estos archivos.
+El catálogo base está en `server/prisma/catalog.ts` (lo usa `pnpm db:seed` en la tienda real). Los datos de la demostración se exportan de ahí a `client/src/services/demo/data.json`. La lógica que imita al servidor está en `client/src/services/demo/mock.ts`. La versión normal de la tienda (`pnpm build`) **no** incluye estos archivos.
 
 ## Cloudflare Pages (alternativa)
 
