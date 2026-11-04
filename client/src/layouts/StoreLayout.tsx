@@ -1,5 +1,5 @@
-import { Camera as Instagram, Globe as Facebook, Menu, MessageCircle, Search, ShoppingBag, User, X } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
+import { Camera as Instagram, ChevronDown, Globe as Facebook, LayoutDashboard, LogOut, Menu, MessageCircle, Package, Search, ShoppingBag, User, X } from "lucide-react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { Link, NavLink, Outlet, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Logo } from "../components/Logo";
@@ -36,6 +36,83 @@ function SearchBox({ onDone, id }: { onDone?: () => void; id: string }) {
         <Search className="size-4" />
       </button>
     </form>
+  );
+}
+
+/** Botón de cuenta con menú: muestra quién inició sesión y permite cerrar sesión. */
+function AccountMenu() {
+  const { user, isAdmin, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => setOpen(false), [location.pathname]);
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => !ref.current?.contains(e.target as Node) && setOpen(false);
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+  if (!user) return null;
+  const item = "flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-cafe-700 hover:bg-rosa-50 hover:text-rosa-700";
+  return (
+    <div ref={ref} className="relative">
+      <button
+        className="flex min-h-10 items-center gap-1.5 rounded-full px-3 text-sm font-bold hover:bg-rosa-50"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={`Cuenta de ${user.firstName}`}
+      >
+        <User className="size-5" />
+        <span className="hidden sm:inline">Mi cuenta</span>
+        <ChevronDown className={`hidden size-4 transition sm:block ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div role="menu" className="absolute right-0 top-12 z-50 w-64 rounded-2xl border border-rosa-100 bg-white p-2 shadow-[var(--shadow-elevada)]">
+          <div className="border-b border-rosa-100 px-3 pt-2 pb-3">
+            <p className="font-display text-[15px] font-semibold text-cafe-900">{user.firstName} {user.lastName}</p>
+            <p className="truncate text-[13px] text-cafe-500">{user.email}</p>
+            <span className={`mt-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-bold ${isAdmin ? "bg-cafe-700 text-white" : "bg-rosa-100 text-rosa-700"}`}>
+              {isAdmin ? "Administradora" : "Cliente"}
+            </span>
+          </div>
+          <div className="pt-1.5">
+            {isAdmin && <Link role="menuitem" to="/admin" className={item}><LayoutDashboard className="size-4" /> Panel de administración</Link>}
+            <Link role="menuitem" to="/cuenta" className={item}><User className="size-4" /> Mi cuenta</Link>
+            <Link role="menuitem" to="/cuenta/pedidos" className={item}><Package className="size-4" /> Mis pedidos</Link>
+            <button
+              role="menuitem"
+              className={item}
+              onClick={async () => {
+                await logout();
+                navigate("/ingresar");
+              }}
+            >
+              <LogOut className="size-4" /> Cerrar sesión
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MobileLogout({ tabIndex }: { tabIndex: number }) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  return (
+    <>
+      <p className="px-1 text-center text-[13px] text-cafe-500">Sesión iniciada como {user?.email}</p>
+      <button className="btn-fantasma" tabIndex={tabIndex} onClick={async () => { await logout(); navigate("/ingresar"); }}>
+        <LogOut className="size-4" /> Cerrar sesión
+      </button>
+    </>
   );
 }
 
@@ -78,10 +155,7 @@ function Header() {
             <Link to="/admin" className="btn-secundario btn-sm hidden sm:inline-flex">Panel admin</Link>
           )}
           {user ? (
-            <Link to="/cuenta" className="flex min-h-10 items-center gap-2 rounded-full px-3 text-sm font-bold hover:bg-rosa-50">
-              <User className="size-5" />
-              <span className="hidden sm:inline">{user.firstName}</span>
-            </Link>
+            <AccountMenu />
           ) : (
             <>
               <Link to="/ingresar" className="btn-primario btn-sm hidden sm:inline-flex"><User className="size-4" /> Iniciar sesión</Link>
@@ -127,6 +201,7 @@ function Header() {
           <div className="mt-auto flex flex-col gap-2 border-t border-crema-200 pt-4">
             <Link to={user ? "/cuenta" : "/ingresar"} className="btn-secundario" tabIndex={open ? 0 : -1}>{user ? "Mi cuenta" : "Iniciar sesión"}</Link>
             {isAdmin && <Link to="/admin" className="btn-cafe" tabIndex={open ? 0 : -1}>Panel administrativo</Link>}
+            {user && <MobileLogout tabIndex={open ? 0 : -1} />}
           </div>
         </div>
       </div>,
