@@ -4,13 +4,13 @@ export function Logo({ tone = "oscuro", tagline = false, size = "md", align = "c
     <span className={`inline-flex flex-col leading-none ${align === "start" ? "items-start" : "items-center"}`}>
       <span
         className={`font-display font-bold tracking-tight ${size === "lg" ? "text-[2.6rem]" : "text-[2rem]"} ${tone === "claro" ? "text-white" : "text-rosa-600"}`}
-        style={{ textShadow: tone === "claro" ? undefined : "0 2px 0 rgb(246 205 211 / 0.9)" }}
+        style={{ textShadow: tone === "claro" ? undefined : "0 2px 0 var(--color-rosa-200)" }}
       >
         Mafer
       </span>
       {tagline && (
         <span className={`mt-1.5 text-[13px] font-semibold ${tone === "claro" ? "text-white/85" : "text-cafe-500"}`}>
-          Pastelería y velas artesanales
+          Velas artesanales
         </span>
       )}
     </span>

@@ -517,7 +517,9 @@ model BlockedDate {
 model StoreSettings {
   id                       Int      @id @default(1)
   storeName                String   @default("Mafer")
-  slogan                   String   @default("Pequeños antojos, grandes momentos")
+  slogan                   String   @default("Velas artesanales para cada momento")
+  /// Temporada visual del sitio: AUTO (según el calendario), BASE, NAVIDAD, AMOR, MUERTOS o HALLOWEEN.
+  season                   String   @default("AUTO") @db.VarChar(20)
   contactEmail             String?
   contactPhone             String?
   whatsapp                 String?

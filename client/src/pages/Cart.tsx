@@ -1,14 +1,16 @@
-import { AlertTriangle, ShoppingBag, Trash2 } from "lucide-react";
+import { AlertTriangle, MessageCircle, ShoppingBag, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { EmptyState, ErrorState, ProductImage, QuantityStepper, Spinner } from "../components/ui";
 import { useAuth } from "../context/AuthContext";
-import { useCart, useCartActions } from "../hooks/useShop";
+import { useCart, useCartActions, useStore } from "../hooks/useShop";
 import { money } from "../lib/format";
+import { cartMessage, whatsappLink } from "../lib/whatsapp";
 
 export default function CartPage() {
   const { data: cart, isLoading, isError, refetch } = useCart();
   const { update, remove } = useCartActions();
   const { user } = useAuth();
+  const { data: store } = useStore();
 
   if (isLoading) return <Spinner label="Cargando tu carrito…" className="py-24" />;
   if (isError || !cart) return <div className="contenedor py-16"><ErrorState message="No pudimos cargar tu carrito." onRetry={refetch} /></div>;
@@ -18,7 +20,7 @@ export default function CartPage() {
       <h1 className="mb-8 text-4xl">Tu carrito</h1>
       {cart.items.length === 0 ? (
         <EmptyState title="Tu carrito está vacío" icon={<ShoppingBag className="size-10" />}>
-          Descubre nuestros pasteles, cupcakes y galletas.
+          Descubre nuestras velas de temporada, recuerdos para eventos y aromáticas.
           <div className="mt-5"><Link to="/catalogo" className="btn-primario">Ver catálogo</Link></div>
         </EmptyState>
       ) : (
@@ -74,6 +76,10 @@ export default function CartPage() {
             ) : (
               <Link to={user ? "/checkout" : "/ingresar?volver=/checkout"} className="btn-primario mt-5 w-full">Continuar con la compra</Link>
             )}
+            <a href={whatsappLink(store?.whatsapp, cartMessage(cart, store?.storeName))} target="_blank" rel="noreferrer noopener" className="btn-secundario mt-2 w-full">
+              <MessageCircle className="size-4" /> Pedir por WhatsApp
+            </a>
+            <p className="mt-2 text-center text-xs text-cafe-400">Ideal para recuerdos por mayoreo: te confirmamos piezas, fecha y pago.</p>
             <Link to="/catalogo" className="btn-fantasma mt-2 w-full">Seguir comprando</Link>
           </aside>
         </div>

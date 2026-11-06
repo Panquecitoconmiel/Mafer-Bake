@@ -1,12 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Clock, Heart, PackageCheck, ShoppingBag } from "lucide-react";
+import { Check, Clock, Heart, MessageCircle, PackageCheck, ShoppingBag } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Breadcrumbs, ErrorState, Price, ProductImage, QuantityStepper, Spinner } from "../components/ui";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
-import { errorMessage, useCartActions } from "../hooks/useShop";
+import { errorMessage, useCartActions, useStore } from "../hooks/useShop";
 import { delta, money, prepTime } from "../lib/format";
+import { whatsappLink } from "../lib/whatsapp";
 import { api, ApiError } from "../services/api";
 import type { Product, Selections } from "../types";
 
@@ -134,6 +135,7 @@ function ProductView({ product }: { product: Product }) {
   const notify = useToast();
   const qc = useQueryClient();
   const { add } = useCartActions();
+  const { data: store } = useStore();
   const [variantId, setVariantId] = useState<string | null>(product.variants[0]?.id ?? null);
   const [sel, setSel] = useState<Selections>(() => {
     // Preselecciona el primer valor de las opciones obligatorias de elección única.
@@ -159,6 +161,25 @@ function ProductView({ product }: { product: Product }) {
   const unit = useMemo(() => estimate(product, variantId, sel), [product, variantId, sel]);
   const customizations = product.options.filter((o) => o.isRequired || sel[o.id]);
 
+  const quoteText = () => {
+    const variant = product.variants.find((v) => v.id === variantId);
+    const details = product.options.flatMap((o) => {
+      const v = sel[o.id];
+      if (v == null || (Array.isArray(v) ? !v.length : !String(v).trim())) return [];
+      const label = (id: string) => o.values.find((x) => x.id === id)?.label ?? id;
+      return [`${o.name}: ${Array.isArray(v) ? v.map(label).join(", ") : o.type === "TEXT" ? String(v) : label(String(v))}`];
+    });
+    return [
+      `¡Hola, ${store?.storeName ?? "Mafer"}! Me interesa cotizar:`,
+      "",
+      `• ${qty} × ${product.name}${variant ? ` (${variant.name})` : ""}`,
+      ...details.map((d) => `  ${d}`),
+      `Total estimado en el sitio: ${money(unit * qty)}`,
+      "",
+      `${location.origin}${location.pathname}`,
+    ].join("\n");
+  };
+
   const submit = (goToCart: boolean) => {
     const errs: Record<string, string> = {};
     for (const o of product.options) {
@@ -182,7 +203,7 @@ function ProductView({ product }: { product: Product }) {
         {/* Galería */}
         <div className="lg:sticky lg:top-32 lg:self-start">
           <div className="overflow-hidden rounded-[1.75rem] bg-rosa-100 shadow-[var(--shadow-suave)]">
-            <ProductImage src={product.images[image]?.url} alt={product.images[image]?.alt ?? product.name} className="aspect-square w-full p-8 drop-shadow-[0_16px_18px_rgb(122_77_58/0.2)]" />
+            <ProductImage src={product.images[image]?.url} alt={product.images[image]?.alt ?? product.name} className="aspect-square w-full p-8 drop-shadow-[0_16px_18px_rgb(0_0_0/0.18)]" />
           </div>
           {product.images.length > 1 && (
             <div className="mt-3 flex gap-2">
@@ -237,6 +258,12 @@ function ProductView({ product }: { product: Product }) {
               </button>
               <button className="btn-cafe" disabled={!product.inStock || add.isPending} onClick={() => submit(true)}>Comprar ahora</button>
             </div>
+            <a href={whatsappLink(store?.whatsapp, quoteText())} target="_blank" rel="noreferrer noopener" className="btn-secundario mt-2 w-full">
+              <MessageCircle className="size-4" /> {product.inventoryMode === "MADE_TO_ORDER" ? "Cotizar por WhatsApp" : "Pedir por WhatsApp"}
+            </a>
+            {product.variants.length > 0 && product.inventoryMode === "MADE_TO_ORDER" && (
+              <p className="mt-2 text-center text-xs text-cafe-400">¿Más piezas o un diseño especial? Cotízalo por WhatsApp con tus colores y la fecha de tu evento.</p>
+            )}
             {user ? (
               <button className="btn-fantasma btn-sm mt-3" onClick={() => toggleFav.mutate()} disabled={toggleFav.isPending} aria-pressed={isFav}>
                 <Heart className={`size-4 ${isFav ? "fill-rosa-600 text-rosa-600" : ""}`} /> {isFav ? "En tus favoritos" : "Guardar en favoritos"}

@@ -38,7 +38,7 @@ export function DeliveryInfo({ s }: { s: StoreSettings }) {
         <h3 className="text-lg">Anticipación y horarios</h3>
         <p className="mt-2 text-sm text-cafe-500">
           Recibimos pedidos con al menos {s.minLeadHours < 24 ? `${s.minLeadHours} horas` : `${days} día${days > 1 ? "s" : ""}`} de anticipación y hasta {s.maxAdvanceDays} días antes.
-          Algunos productos, como los pasteles personalizados, requieren más tiempo: lo verás en cada producto y al elegir la fecha.
+          Los recuerdos personalizados para eventos requieren más tiempo: lo verás en cada producto y al elegir la fecha.
           {s.closedWeekdays.length > 0 && <> No hay entregas los {s.closedWeekdays.map((d) => DAYS[d]).join(", ")}.</>}
           {s.businessHours && <> Horario de atención: {s.businessHours}.</>}
         </p>
@@ -60,8 +60,12 @@ export function FAQ({ s }: { s: StoreSettings }) {
         : "Estamos terminando de configurar el pago en línea con Stripe. Mientras tanto puedes armar tu carrito y crear tu cuenta.",
     },
     {
-      q: "¿Puedo personalizar mi pastel?",
-      a: "Sí. En los pasteles personalizados eliges sabor del pan, relleno, cobertura, decoración, colores, temática y mensaje. Cada opción muestra su costo adicional antes de agregarla.",
+      q: "¿Puedo personalizar los recuerdos de mi evento?",
+      a: "Sí. En los recuerdos de bautizo, baby shower, bodas y XV años eliges el color del listón, la etiqueta con nombres y fecha, y nos cuentas los colores de tu evento. Se venden por paquete; para más de 50 piezas o un diseño especial, cotiza por WhatsApp.",
+    },
+    {
+      q: "¿Las velas de temporada están todo el año?",
+      a: "Cada temporada (Navidad, amor y amistad, Día de muertos y Halloween) tiene su colección. Se pueden apartar con anticipación y las aromáticas están disponibles todo el año.",
     },
     {
       q: "¿Hacen entregas a domicilio?",

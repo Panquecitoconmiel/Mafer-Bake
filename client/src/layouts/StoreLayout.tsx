@@ -1,23 +1,28 @@
-import { Camera as Instagram, ChevronDown, Globe as Facebook, LayoutDashboard, LogOut, Menu, MessageCircle, Package, Search, ShoppingBag, User, X } from "lucide-react";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { Camera as Instagram, ChevronDown, Globe as Facebook, LayoutDashboard, LogOut, Menu, MessageCircle, Package, Palette, Search, ShoppingBag, User, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { Link, NavLink, Outlet, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Logo } from "../components/Logo";
 import { useAuth } from "../context/AuthContext";
 import { useCart, useStore } from "../hooks/useShop";
+import { SEASONS, setSeasonPreview, useSeason, type SeasonId } from "../lib/seasons";
 import { DEMO_MODE } from "../services/api";
 
-const NAV = [
-  { to: "/", label: "Inicio", end: true },
-  { to: "/catalogo", label: "Catálogo", end: true },
-  { to: "/categoria/pasteles", label: "Pasteles" },
-  { to: "/categoria/cupcakes", label: "Cupcakes" },
-  { to: "/categoria/donas", label: "Donas" },
-  { to: "/categoria/galletas", label: "Galletas" },
-  { to: "/categoria/pan-dulce", label: "Pan dulce" },
-  { to: "/categoria/velas", label: "Velas" },
-  { to: "/promociones", label: "Promociones" },
-];
+/** Menú principal: la colección de la temporada vigente aparece en segundo lugar. */
+function useNav() {
+  const season = useSeason();
+  return [
+    { to: "/", label: "Inicio", end: true },
+    ...(season.category ? [{ to: `/categoria/${season.category}`, label: season.name }] : []),
+    { to: "/catalogo", label: "Catálogo", end: true },
+    { to: "/categoria/bautizo", label: "Bautizo" },
+    { to: "/categoria/baby-shower", label: "Baby shower" },
+    { to: "/categoria/bodas", label: "Bodas" },
+    { to: "/categoria/xv-y-cumpleanos", label: "XV y cumpleaños" },
+    { to: "/categoria/aromaticas", label: "Aromáticas" },
+    { to: "/promociones", label: "Promociones" },
+  ];
+}
 
 function SearchBox({ onDone, id }: { onDone?: () => void; id: string }) {
   const navigate = useNavigate();
@@ -31,7 +36,7 @@ function SearchBox({ onDone, id }: { onDone?: () => void; id: string }) {
   return (
     <form role="search" onSubmit={submit} className="relative w-full">
       <label htmlFor={id} className="sr-only">Buscar productos</label>
-      <input id={id} type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar pasteles, cupcakes, galletas…" className="campo min-h-10 rounded-full pr-11 pl-4 text-sm" />
+      <input id={id} type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar velas, recuerdos, aromas…" className="campo min-h-10 rounded-full pr-11 pl-4 text-sm" />
       <button type="submit" className="absolute top-1 right-1 grid size-8 place-items-center rounded-full bg-rosa-600 text-white hover:bg-rosa-700" aria-label="Buscar">
         <Search className="size-4" />
       </button>
@@ -117,6 +122,7 @@ function MobileLogout({ tabIndex }: { tabIndex: number }) {
 }
 
 function Header() {
+  const NAV = useNav();
   const { user, isAdmin } = useAuth();
   const { data: cart } = useCart();
   const [open, setOpen] = useState(false);
@@ -222,13 +228,13 @@ function Footer() {
   const col = "mb-3 font-display text-base font-semibold text-cafe-900";
   const link = "hover:text-rosa-600";
   return (
-    <footer className="mt-20">
+    <footer className="relative z-[1] mt-20">
       <div className="rayas h-3" aria-hidden="true" />
       <div className="bg-rosa-100 text-cafe-700">
         <div className="contenedor grid gap-10 py-14 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div className="flex flex-col items-start">
             <Logo tagline align="start" />
-            <p className="mt-4 max-w-xs font-display text-lg text-cafe-700">«{s?.slogan ?? "Pequeños antojos, grandes momentos"}»</p>
+            <p className="mt-4 max-w-xs font-display text-lg text-cafe-700">«{s?.slogan ?? "Velas artesanales para cada momento"}»</p>
             {social.length > 0 && (
               <div className="mt-5 flex gap-2">
                 {social.map(({ href, label, Icon }) => (
@@ -243,7 +249,8 @@ function Footer() {
             <h2 className={col}>Tienda</h2>
             <ul className="space-y-2 text-sm">
               <li><Link className={link} to="/catalogo">Catálogo completo</Link></li>
-              <li><Link className={link} to="/categoria/velas">Velas de postre</Link></li>
+              <li><Link className={link} to="/categoria/aromaticas">Velas aromáticas</Link></li>
+              <li><Link className={link} to="/categoria/velas">Velas postre</Link></li>
               <li><Link className={link} to="/promociones">Promociones</Link></li>
               <li><Link className={link} to="/cuenta/pedidos">Mis pedidos</Link></li>
             </ul>
@@ -289,17 +296,87 @@ function DemoNotice() {
   );
 }
 
+/** Partículas de temporada (nieve, corazones, pétalos de cempasúchil o chispas). Decorativas. */
+const DECOR: Partial<Record<SeasonId, { colors: string[]; shape: "circle" | "heart" | "petal" | "spark"; count: number }>> = {
+  NAVIDAD: { colors: ["#fff7ea", "#ffffff", "#f5e6d1"], shape: "circle", count: 42 },
+  AMOR: { colors: ["#f39aac", "#c21d3c", "#ffc2cd"], shape: "heart", count: 18 },
+  MUERTOS: { colors: ["#f4a742", "#f29e1f", "#c2185b"], shape: "petal", count: 24 },
+  HALLOWEEN: { colors: ["#f08a3c", "#8a6bb0", "#f0b45c"], shape: "spark", count: 22 },
+};
+function SeasonDecor({ id }: { id: SeasonId }) {
+  const cfg = DECOR[id];
+  const items = useMemo(() => {
+    if (!cfg) return [];
+    let seed = 7;
+    const rnd = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
+    return Array.from({ length: cfg.count }, (_, i) => ({
+      left: `${rnd() * 100}%`,
+      size: cfg.shape === "circle" ? 3 + rnd() * 5 : 9 + rnd() * 9,
+      duration: `${9 + rnd() * 12}s`,
+      delay: `${-rnd() * 20}s`,
+      deriva: `${(rnd() - 0.5) * 120}px`,
+      color: cfg.colors[i % cfg.colors.length],
+    }));
+  }, [cfg]);
+  if (!cfg) return null;
+  const shape = (color: string): CSSProperties => {
+    if (cfg.shape === "circle") return { background: color, borderRadius: "50%" };
+    if (cfg.shape === "petal") return { background: color, borderRadius: "70% 0 70% 0" };
+    if (cfg.shape === "heart") return { background: color, clipPath: "path('M5 9 C1 6 0 4 0 2.5 C0 1 1 0 2.5 0 C3.6 0 4.5 0.7 5 1.6 C5.5 0.7 6.4 0 7.5 0 C9 0 10 1 10 2.5 C10 4 9 6 5 9Z')", transform: "scale(1.4)" };
+    return { background: color, clipPath: "polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%)" };
+  };
+  return (
+    <div className="temporada-decor" aria-hidden="true">
+      {items.map((it, i) => (
+        <i key={i} style={{ left: it.left, width: it.size, height: it.size, animationDuration: it.duration, animationDelay: it.delay, ["--deriva" as string]: it.deriva, ...shape(it.color) }} />
+      ))}
+    </div>
+  );
+}
+
+/** Solo en la demostración: permite mostrar al cliente cómo se ve cada temporada. */
+function SeasonPreview({ current }: { current: SeasonId }) {
+  const [open, setOpen] = useState(false);
+  if (!DEMO_MODE) return null;
+  return (
+    <div className="fixed bottom-4 left-4 z-40">
+      {open && (
+        <div role="menu" className="mb-2 w-60 rounded-2xl border border-rosa-100 bg-white p-2 shadow-[var(--shadow-elevada)]">
+          <p className="px-3 pt-1 pb-2 text-xs font-semibold text-cafe-500">Ver el sitio en temporada…</p>
+          {(Object.keys(SEASONS) as SeasonId[]).map((id) => (
+            <button key={id} role="menuitemradio" aria-checked={id === current} onClick={() => { setSeasonPreview(id); setOpen(false); }}
+              className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-semibold ${id === current ? "bg-rosa-100 text-rosa-700" : "text-cafe-700 hover:bg-rosa-50"}`}>
+              {SEASONS[id].name}
+              {id === current && <span aria-hidden="true">●</span>}
+            </button>
+          ))}
+        </div>
+      )}
+      <button onClick={() => setOpen((v) => !v)} aria-expanded={open} className="btn-cafe btn-sm shadow-[var(--shadow-elevada)]">
+        <Palette className="size-4" /> Temporada: {SEASONS[current].name}
+      </button>
+    </div>
+  );
+}
+
 export function StoreLayout() {
   const { pathname } = useLocation();
+  const season = useSeason();
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+  useEffect(() => {
+    document.documentElement.dataset.season = season.id;
+    return () => void delete document.documentElement.dataset.season;
+  }, [season.id]);
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="relative flex min-h-dvh flex-col">
+      <SeasonDecor key={season.id} id={season.id} />
+      <SeasonPreview current={season.id} />
       <a href="#contenido" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-full focus:bg-white focus:px-4 focus:py-2">Saltar al contenido</a>
       <DemoNotice />
       <Header />
-      <main id="contenido" className="flex-1">
+      <main id="contenido" className="relative z-[1] flex-1">
         <Outlet />
       </main>
       <Footer />

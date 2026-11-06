@@ -4,7 +4,8 @@
  * modifícalos desde el panel administrativo antes de vender.
  *
  * Es seguro ejecutarlo varias veces: no borra usuarios ni pedidos, no modifica productos
- * que ya existan y retira los productos de la demostración anterior (ilustraciones /demo/).
+ * que ya existan, retira los productos de la demostración anterior (ilustraciones /demo/) y
+ * archiva los de categorías retiradas (los postres).
  */
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
@@ -13,7 +14,7 @@ import { categories, products, retiredCategories } from "./catalog.js";
 
 const url = process.env.SEED_DATABASE_URL ?? process.env.DATABASE_URL!;
 const prisma = new PrismaClient({ adapter: mysqlAdapter(url) });
-const image = (slug: string) => `/productos/${slug}.webp`;
+const image = (p: { slug: string; image?: string }) => p.image ?? `/productos/${p.slug}.webp`;
 
 async function retireOldDemo() {
   const old = await prisma.product.findMany({
@@ -30,6 +31,12 @@ async function retireOldDemo() {
     console.info(`− Retirado de la demostración anterior: ${p.name}`);
   }
   await prisma.category.updateMany({ where: { slug: { in: retiredCategories } }, data: { isActive: false } });
+  // Mafer ahora vende solo velas: los productos de categorías retiradas se archivan (conservan su historial).
+  const archived = await prisma.product.updateMany({
+    where: { category: { slug: { in: retiredCategories } }, status: { not: "ARCHIVED" } },
+    data: { status: "ARCHIVED", isFeatured: false },
+  });
+  if (archived.count) console.info(`− Archivados ${archived.count} productos de categorías retiradas`);
 }
 
 async function main() {
@@ -73,7 +80,7 @@ async function main() {
         stock: p.stock ?? 0,
         lowStockThreshold: p.low ?? 5,
         prepTimeHours: p.prep,
-        images: { create: [{ url: image(p.slug), alt: p.name, sortOrder: 0 }] },
+        images: { create: [{ url: image(p), alt: p.name, sortOrder: 0 }] },
         variants: { create: (p.variants ?? []).map(([name, delta], i) => ({ name, priceDeltaCents: delta * 100, sortOrder: i })) },
       },
     });

@@ -56,7 +56,7 @@ export default function Catalog({ promotions = false }: { promotions?: boolean }
   const hasFilters = !!(query.q || query.minPrice || query.maxPrice || query.available);
 
   const title = promotions ? "Promociones" : category?.name ?? (slug ? "Categoría" : query.q ? `Resultados para «${query.q}»` : "Catálogo");
-  const description = promotions ? "Precios especiales por tiempo limitado." : category?.description ?? "Pasteles, cupcakes, galletas y postres hechos a mano.";
+  const description = promotions ? "Precios especiales por tiempo limitado." : category?.description ?? "Velas de temporada, recuerdos para eventos y aromáticas, hechas a mano.";
 
   const filters = (
     <div className="space-y-6">
