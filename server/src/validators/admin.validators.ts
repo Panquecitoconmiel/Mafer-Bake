@@ -137,7 +137,6 @@ export const settingsSchema = z
     pricesIncludeTax: z.boolean(),
     taxRatePercent: z.number().min(0).max(100).optional().nullable(),
     cancellationPolicy: optStr(2000),
-    season: z.enum(["AUTO", "BASE", "NAVIDAD", "AMOR", "MUERTOS", "HALLOWEEN"]).optional(),
   })
   .strict()
   .refine((s) => !s.deliveryEnabled || s.deliveryFeeCents != null, {

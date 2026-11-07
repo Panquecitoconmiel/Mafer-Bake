@@ -115,8 +115,6 @@ export interface StoreSettings {
   closedWeekdays: number[];
   pricesIncludeTax: boolean;
   cancellationPolicy: string | null;
-  /** AUTO, BASE, NAVIDAD, AMOR, MUERTOS o HALLOWEEN */
-  season: string;
   paymentsEnabled: boolean;
   currency: string;
 }

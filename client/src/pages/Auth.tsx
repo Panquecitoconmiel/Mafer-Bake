@@ -9,7 +9,7 @@ import { useAuth } from "../context/AuthContext";
 import { api, ApiError, DEMO_MODE } from "../services/api";
 
 /** Diseño de autenticación: ilustración + tarjeta (inspirado en la referencia visual de Mafer). */
-function AuthShell({ title, subtitle, children, image = asset("/productos/velas/ambar.svg") }: { title: string; subtitle?: string; children: ReactNode; image?: string }) {
+function AuthShell({ title, subtitle, children, image = asset("/productos/vela-pastelito-fresas.webp") }: { title: string; subtitle?: string; children: ReactNode; image?: string }) {
   return (
     <div className="contenedor flex justify-center py-8 sm:py-14">
       <div className="grid w-full max-w-4xl overflow-hidden rounded-[2rem] bg-crema-50 shadow-[var(--shadow-elevada)] md:grid-cols-2">
@@ -108,7 +108,7 @@ export function Register() {
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: e.target.value });
 
   return (
-    <AuthShell title="Crear cuenta" subtitle="Guarda tus direcciones, favoritos y sigue tus pedidos." image={asset("/productos/velas/recuerdo-boda-frasco.svg")}>
+    <AuthShell title="Crear cuenta" subtitle="Guarda tus direcciones, favoritos y sigue tus pedidos." image={asset("/productos/pastel-feliz-cumpleanos.webp")}>
       <form className="space-y-4" onSubmit={submit} noValidate>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Nombre" autoComplete="given-name" required value={f.firstName} onChange={set("firstName")} error={err("firstName")} />
@@ -136,7 +136,7 @@ export function ForgotPassword() {
   const [email, setEmail] = useState("");
   const m = useMutation({ mutationFn: () => api.forgot(email.trim()) });
   return (
-    <AuthShell title="Recuperar contraseña" subtitle="Te enviaremos un enlace para crear una nueva." image={asset("/productos/velas/lavanda.svg")}>
+    <AuthShell title="Recuperar contraseña" subtitle="Te enviaremos un enlace para crear una nueva." image={asset("/productos/galleta-corazon-mermelada.webp")}>
       {m.isSuccess ? (
         <Alert kind="exito">{m.data.message}</Alert>
       ) : (
@@ -159,7 +159,7 @@ export function ResetPassword() {
   const m = useMutation({ mutationFn: () => api.reset({ token, password, confirmPassword: confirm }) });
   const fe = m.error instanceof ApiError ? m.error.fieldErrors : {};
   return (
-    <AuthShell title="Nueva contraseña" image={asset("/productos/velas/lavanda.svg")}>
+    <AuthShell title="Nueva contraseña" image={asset("/productos/galleta-corazon-mermelada.webp")}>
       {!token ? (
         <Alert kind="error">El enlace no es válido. Solicita uno nuevo.</Alert>
       ) : m.isSuccess ? (

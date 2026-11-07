@@ -6,13 +6,12 @@ import { useToast } from "../../context/ToastContext";
 import { errorMessage } from "../../hooks/useShop";
 import { PageHeader, Table } from "../../layouts/AdminLayout";
 import { longDate, parseMoney } from "../../lib/format";
-import { resolveSeason, SEASON_OPTIONS, SEASONS } from "../../lib/seasons";
 import { adminApi, ApiError } from "../../services/api";
 
 interface Settings {
   storeName: string; slogan: string; contactEmail: string | null; contactPhone: string | null; whatsapp: string | null; instagramUrl: string | null; facebookUrl: string | null;
   pickupAddress: string | null; businessHours: string | null; pickupEnabled: boolean; deliveryEnabled: boolean; deliveryFeeCents: number | null; freeDeliveryMinCents: number | null;
-  deliveryCoverage: string | null; minLeadHours: number; maxAdvanceDays: number; closedWeekdays: number[]; pricesIncludeTax: boolean; taxRatePercent: string | null; cancellationPolicy: string | null; season: string;
+  deliveryCoverage: string | null; minLeadHours: number; maxAdvanceDays: number; closedWeekdays: number[]; pricesIncludeTax: boolean; taxRatePercent: string | null; cancellationPolicy: string | null;
 }
 interface Slot { id: string; label: string; startTime: string; endTime: string; capacity: number; isActive: boolean; sortOrder: number }
 const DAYS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
@@ -33,10 +32,10 @@ export default function AdminSettings() {
     mutationFn: () => {
       // Solo se envían los campos editables (el servidor rechaza campos internos como id o updatedAt).
       const { storeName, slogan, contactEmail, contactPhone, whatsapp, instagramUrl, facebookUrl, pickupAddress, businessHours,
-        pickupEnabled, deliveryEnabled, deliveryCoverage, minLeadHours, maxAdvanceDays, closedWeekdays, pricesIncludeTax, cancellationPolicy, season } = s!;
+        pickupEnabled, deliveryEnabled, deliveryCoverage, minLeadHours, maxAdvanceDays, closedWeekdays, pricesIncludeTax, cancellationPolicy } = s!;
       return adminApi.send("PUT", "/settings", {
         storeName, slogan, contactEmail, contactPhone, whatsapp, instagramUrl, facebookUrl, pickupAddress, businessHours,
-        pickupEnabled, deliveryEnabled, deliveryCoverage, minLeadHours, maxAdvanceDays, closedWeekdays, pricesIncludeTax, cancellationPolicy, season,
+        pickupEnabled, deliveryEnabled, deliveryCoverage, minLeadHours, maxAdvanceDays, closedWeekdays, pricesIncludeTax, cancellationPolicy,
         deliveryFeeCents: fee ? parseMoney(fee) : null,
         freeDeliveryMinCents: freeMin ? parseMoney(freeMin) : null,
         taxRatePercent: s!.taxRatePercent ? Number(s!.taxRatePercent) : null,
@@ -74,22 +73,6 @@ export default function AdminSettings() {
     <>
       <PageHeader title="Configuración" subtitle="Estos datos se muestran en la tienda. Lo que dejes vacío no se publica." />
       <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }} className="grid gap-6 xl:grid-cols-2">
-        <section className="tarjeta space-y-4 p-5 xl:col-span-2">
-          <h2 className="text-lg">Temporada del sitio</h2>
-          <p className="text-sm text-cafe-500">Cambia los colores, la portada y la colección destacada de la tienda.</p>
-          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Temporada del sitio">
-            {SEASON_OPTIONS.map((o) => (
-              <button key={o.value} type="button" role="radio" aria-checked={s.season === o.value} aria-pressed={s.season === o.value} className="chip" onClick={() => setS({ ...s, season: o.value })}>
-                {o.label}
-              </button>
-            ))}
-          </div>
-          <p className="ayuda">
-            En automático: Halloween del 1 al 27 de octubre, Día de muertos del 28 de octubre al 2 de noviembre, Navidad del 15 de noviembre al 6 de enero
-            y Amor y amistad del 1 al 14 de febrero. El resto del año se usa la paleta nude. Hoy se mostraría: <strong>{SEASONS[resolveSeason(s.season)].name}</strong>.
-          </p>
-        </section>
-
         <section className="tarjeta space-y-4 p-5">
           <h2 className="text-lg">Información de la tienda</h2>
           <Field label="Nombre comercial" required {...text("storeName")} />

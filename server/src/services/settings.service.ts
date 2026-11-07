@@ -37,7 +37,6 @@ export function publicSettings(s: Settings) {
     closedWeekdays: s.closedWeekdays,
     pricesIncludeTax: s.pricesIncludeTax,
     cancellationPolicy: s.cancellationPolicy,
-    season: s.season,
     paymentsEnabled: env.stripeEnabled,
     currency: env.STRIPE_CURRENCY,
   };
